@@ -69,7 +69,7 @@ model RegularUser {
   available      Boolean         @default(false)
   lastActiveAt   DateTime?
   qualifications Qualification[]
-  jobs           Job[]
+  jobs           Job[]           @relation("WorkerJobs")
   interests      Interest[]
   negotiations   Negotiation[]
 }
@@ -133,7 +133,7 @@ model Job {
   businessId     Int
   positionType   PositionType  @relation(fields: [positionTypeId], references: [id])
   positionTypeId Int
-  worker         RegularUser?  @relation(fields: [workerId], references: [accountId])
+  worker         RegularUser?  @relation("WorkerJobs", fields: [workerId], references: [accountId])
   workerId       Int?
   note           String        @default("")
   salary_min     Float
