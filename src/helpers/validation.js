@@ -1,0 +1,14 @@
+// use regex to determine if the email is valid
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// check at least 1 lowercase, 1 uppercase, 1 digit, 1 special character, between length 8-20 regex
+function isValidPassword(password) {
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?/{}~|]).{8,20}$/;
+  return passwordRegex.test(password);
+}
+
+module.exports = { isValidEmail , isValidPassword};
+

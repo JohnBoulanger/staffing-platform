@@ -8,13 +8,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const bcrypt = require("bcrypt")
-
-// use bcrypt to hash password
-async function encodePassword(password) {
-    const enc = await bcrypt.hash(password, 10);
-    return enc;
-}
+const encodePassword = require("../src/helpers/encodePassword")
 
 async function main() {
     
@@ -24,19 +18,21 @@ async function main() {
     const [ utorid, email, password ] = userArgs;
     const encPass = await encodePassword(password);
 
-    // add admin to the database
+    // add account and admin to the database
+    const account = await prisma.account.create({
+        data: {
+            email: email,
+            password: encPass,
+            role: "admin",
+            activated: true
+        }
+    });
+
     await prisma.administrator.create({
         data: {
-            account: {
-                create: {
-                    email: email,
-                    password: encPass,
-                    role: "admin",
-                    activated: true
-                }
-            }
+            accountId: account.id
         }
-    })
+    });
 }
 
 main();
