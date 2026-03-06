@@ -31,11 +31,14 @@ async function updatePositionType(req, res) {
     try {
         const positionTypeId = parseInt(req.params.positionTypeId);
         const response = await PositionTypeService.updatePositionType(req.body, positionTypeId);
-        return res.status(201).json(response);
+        return res.status(200).json(response);
     }
     catch (error) {
         if (error.type === "validation") {
             return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not found" });
         }
         return res.status(500).json({ error: "Internal Server Error" }); 
     }
@@ -44,12 +47,15 @@ async function updatePositionType(req, res) {
 async function deletePositionType(req, res) {
     try {
         const positionTypeId = parseInt(req.params.positionTypeId);
-        const response = await PositionTypeService.deletePositionType(req.body, positionTypeId);
-        return res.status(201).json(response);
+        await PositionTypeService.deletePositionType(positionTypeId);
+        return res.status(204).send();
     }
     catch (error) {
-        if (error.type === "validation") {
-            return res.status(400).json({ error: "Bad Request" });
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not found" });
+        }
+        if (error.type === "conflict") {
+            return res.status(409).json({ error: "Conflict, There are qualified users" });
         }
         return res.status(500).json({ error: "Internal Server Error" }); 
     }

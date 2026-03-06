@@ -6,6 +6,7 @@ const userRoutes = require("./routes/users")
 const businessRoutes = require("./routes/businesses")
 const positionTypeRoutes = require("./routes/positionTypes")
 const jobRoutes = require("./routes/jobs");
+const qualificationRoutes = require("./routes/qualifications");
 
 function create_app() {
     const app = express();
@@ -15,7 +16,8 @@ function create_app() {
     app.use("/users", userRoutes);
     app.use("/businesses", businessRoutes);
     app.use("/position-types", positionTypeRoutes);
-    app.use("/jobs", jobRoutes)
+    app.use("/jobs", jobRoutes);
+    app.use("/qualifications", qualificationRoutes);
 
     return app;
 }

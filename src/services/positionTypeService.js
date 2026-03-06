@@ -104,12 +104,52 @@ class PositionTypeService {
         };
     }
 
-    static async updatePositionType(data) {
+    static async updatePositionType(data, positionTypeId) {
+        const { name, description } = data;
+        const hidden = parseBoolean(data.hidden);
 
+        // find position type associated with id
+        const positionType = await prisma.positionType.findUnique({
+            where: { id: positionTypeId }
+        });
+
+        if (!positionType) {
+            throw { type: "not_found" };
+        }
+
+        // construct update body
+        const updateValues = {};
+        if (name) updateValues.name = name;
+        if (description) updateValues.description = description;
+        if (hidden !== undefined) updateValues.hidden = hidden;
+
+        const updated = await prisma.positionType.update({
+            where: { id: positionTypeId },
+            data: updateValues
+        });
+
+        // return fields that were updated
+        return {
+            id: updated.id,
+            ...updateValues
+        };
     }
 
-    static async deletePositionType(data) {
+    static async deletePositionType(positionTypeId) {
+        // find position type associated with id
+        const positionType = await prisma.positionType.findUnique({
+            where: { id: positionTypeId }
+        });
 
+        if (!positionType) {
+            throw { type: "not_found" };
+        }
+
+        // todo: implement conflic error handler
+
+        await prisma.positionType.delete({
+            where: { id: positionTypeId }
+        });
     }
 }
 
