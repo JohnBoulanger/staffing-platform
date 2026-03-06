@@ -18,21 +18,19 @@ async function main() {
     const [ utorid, email, password ] = userArgs;
     const encPass = await encodePassword(password);
 
-    // add account and admin to the database
-    const account = await prisma.account.create({
-        data: {
-            email: email,
-            password: encPass,
-            role: "admin",
-            activated: true
-        }
-    });
-
+    // add admin to the database
     await prisma.administrator.create({
         data: {
-            accountId: account.id
+            account: {
+                create: {
+                    email: email,
+                    password: encPass,
+                    role: "admin",
+                    activated: true
+                }
+            }
         }
-    });
+    })
 }
 
 main();

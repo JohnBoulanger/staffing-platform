@@ -10,5 +10,12 @@ function isValidPassword(password) {
   return passwordRegex.test(password);
 }
 
-module.exports = { isValidEmail , isValidPassword};
+function parseBoolean(value) {
+    if (value === undefined) return undefined;
+    if (value === "true") return true;
+    if (value === "false") return false;
+    throw { type: "validation" };
+}
+
+module.exports = { isValidEmail , isValidPassword, parseBoolean };
 
