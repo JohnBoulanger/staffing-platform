@@ -13,4 +13,46 @@ async function createPositionType(req, res) {
     }
 }
 
-module.exports = { createPositionType };
+async function getPositionTypes(req, res) {
+    try {
+        const requesterRole = req.user?.role;
+        const positionTypes = await PositionTypeService.getPositionTypes(req.query, requesterRole);
+        return res.status(200).json(positionTypes);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" }); 
+    }
+}
+
+async function updatePositionType(req, res) {
+    try {
+        const positionTypeId = parseInt(req.params.positionTypeId);
+        const response = await PositionTypeService.updatePositionType(req.body, positionTypeId);
+        return res.status(201).json(response);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" }); 
+    }
+}
+
+async function deletePositionType(req, res) {
+    try {
+        const positionTypeId = parseInt(req.params.positionTypeId);
+        const response = await PositionTypeService.deletePositionType(req.body, positionTypeId);
+        return res.status(201).json(response);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" }); 
+    }
+}
+
+module.exports = { createPositionType, getPositionTypes, updatePositionType, deletePositionType };

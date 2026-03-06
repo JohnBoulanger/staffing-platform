@@ -80,8 +80,8 @@ class UserService {
         const { keyword } = data;
         const activated = parseBoolean(data.activated);
         const suspended = parseBoolean(data.suspended);
-        const page = data.page ? parseInt(data.page) : 1;
-        const limit = data.limit ? parseInt(data.limit) : 10;
+        const page = parseInt(data.page) || 1;
+        const limit = parseInt(data.limit) || 10;
         const skip = (page - 1) * limit;
 
         // construct where clause for regular users
@@ -114,10 +114,21 @@ class UserService {
             include: { account: true }
         });
 
-        // todo: format results according to spec
+        const results = users.map((u) => ({
+            id: u.accountId,
+            first_name: u.first_name,
+            last_name: u.last_name,
+            email: u.account.email,
+            activated: u.account.activated,
+            suspended: u.suspended,
+            role: u.account.role,
+            phone_number: u.phone_number,
+            postal_address: u.postal_address
+        }));
+
         return {
-            count: count,
-            results: users
+            count,
+            results
         };
     }
 

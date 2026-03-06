@@ -1,9 +1,16 @@
 const express = require("express");
-const { createPositionType } = require("../controllers/positionTypeController")
+const { createPositionType, updatePositionType, deletePositionType, getPositionTypes } = require("../controllers/positionTypeController")
 
 const router = express.Router();
 
 // create a new position type
 router.post("/", createPositionType);
+// edit a position types details
+router.patch("/:positionTypeId", updatePositionType);
+// delete a position type
+router.delete("/:positionTypeId", deletePositionType);
+// retrieve a list of position types
+router.get("/", getPositionTypes);
+
 
 module.exports = router
