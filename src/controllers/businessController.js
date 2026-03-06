@@ -1,15 +1,15 @@
-const { createBusiness } = require("../services/businessService");
+const { BusinessService } = require("../services/businessService");
 
 async function registerBusiness(req, res) {
     try {
-        const business = await createBusiness(req.body);
+        const business = await BusinessService.registerBusiness(req.body);
         return res.status(201).json(business);
-    } catch (err) {
-        if (err.type === "validation") {
-            return res.status(400).json({ error: err.message });
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
         }
-        if (err.type === "conflict") {
-            return res.status(409).json({ error: err.message });
+        if (error.type === "conflict") {
+            return res.status(409).json({ error: "Conflict" });
         }
         return res.status(500).json({ error: "Internal Server Error" });
     }

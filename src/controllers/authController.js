@@ -1,5 +1,4 @@
-const { createResetToken, processResetToken } = require("../services/authService");
-const { loginAccount } = require("../services/authService");
+const { AuthService } = require("../services/authService");
 
 // authenticate an account holder and generate a jwt token
 async function authenticateAccount(req, res) {
@@ -12,7 +11,7 @@ async function authenticateAccount(req, res) {
             return res.status(400).json({ error: "Bad Request" });
         }
 
-        const result = await loginAccount(email, password);
+        const result = await AuthService.authenticateAccount(email, password);
 
         return res.status(200).json(result);
     }
@@ -30,14 +29,14 @@ async function authenticateAccount(req, res) {
     }
 }
 
-async function requestPasswordReset(req, res) {
+async function createResetToken(req, res) {
     try {
         // check if email is valid
         const { email } = req.body;
         if (!email) {
             return res.status(400).json({ error: "Bad Request" });
         }
-        const resetToken = await createResetToken(email);
+        const resetToken = await AuthService.createResetToken(email);
         return res.status(202).json(resetToken);
     }
     catch (error) {
@@ -56,7 +55,7 @@ async function useResetToken(req, res) {
         if (!email) {
             return res.status(400).json({ error: "Bad Request" });
         }
-        await processResetToken(email, password, resetToken);
+        await AuthService.useResetToken(email, password, resetToken);
         return res.status(200).end();
     }
     catch (error) {
@@ -77,4 +76,4 @@ async function useResetToken(req, res) {
     }
 }
 
-module.exports = { authenticateAccount, requestPasswordReset, useResetToken };
+module.exports = { authenticateAccount, createResetToken, useResetToken };

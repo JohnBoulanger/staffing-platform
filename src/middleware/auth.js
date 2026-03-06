@@ -17,10 +17,10 @@ const jwtAuth = (req, res, next) => {
   }
 
   // verify the tokens signature and expiration using the secret key
-  jwt.verify(token, SECRET_KEY, async (err, userData) => {
+  jwt.verify(token, SECRET_KEY, async (error, userData) => {
 
     // verification failed
-    if (err) {
+    if (error) {
       return res.status(401).json({ error: "Unauthorized"});
     }
 
@@ -39,7 +39,7 @@ const jwtAuth = (req, res, next) => {
         // continue processing next request
         next();
     }
-    catch(error) {
+    catch (error) {
         return res.status(500).json({ error: "Internal Server Error"});
     }
     
