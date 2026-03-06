@@ -15,6 +15,41 @@ async function registerUser(req, res) {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
+// get specific user
+async function getUser(req, res) {
+    try {
+        const userId = req.user?.id;
+        const user = await UserService.getUser(userId);
+        return res.status(200).json(user);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+// updated authenticated user
+async function updateUser(req, res) {
+    try {
+        const userId = req.user?.id;
+        const user = await UserService.updateUser(req.body, userId);
+        return res.status(200).json(user);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
 
 // retrieve a list of regular users
 async function getUsers(req, res) {
@@ -30,6 +65,23 @@ async function getUsers(req, res) {
     }
 }
 
+// update user availability
+async function updateUserAvailability(req, res) {
+    try {
+        const userId = req.user?.id;
+        const user = await UserService.updateUserAvailability(req.body, userId);
+        return res.status(200).json(user);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
 
 // set the suspend status of a regular user
 async function updateUserSuspend(req, res) {
@@ -49,4 +101,4 @@ async function updateUserSuspend(req, res) {
     }
 }
 
-module.exports = { registerUser, getUsers, updateUserSuspend };
+module.exports = { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability };

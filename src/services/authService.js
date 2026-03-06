@@ -59,7 +59,8 @@ class AuthService {
             throw { type: "not_found"};
         }
 
-        // create reset token
+        // create reset token that expires in 7 days
+        // todo: rate limiting with reset cooldown
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
         const reset = await prisma.resetToken.create({

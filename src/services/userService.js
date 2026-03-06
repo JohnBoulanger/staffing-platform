@@ -76,6 +76,82 @@ class UserService {
         };
     }
 
+    static async getUser(userId) {
+        const now = Date.now();
+        // get authenticated user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId },
+            include: { account: true }
+        });
+
+        if (!user) {
+            throw { type: "not_found" };
+        }
+
+        // check activity status
+        let available = false
+        if (user.available && user.lastActiveAt) {
+            const lastActive = new Date(user.lastActiveAt).getTime();
+            const elapsedSeconds = (now - lastActive) / 1000;
+            active = elapsedSeconds <= system.availabilityTimeout;
+        } 
+        return {
+            id: user.accountId,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.account.email,
+            activated: user.account.activated,
+            suspended: user.suspended,
+            available,
+            role: user.account.role,
+            phone_number: user.phone_number ?? "",
+            postal_address: user.postal_address ?? "",
+            birthday: user.birthday,
+            createdAt: user.account.createdAt,
+            avatar: user.avatar,
+            resume: user.resume,
+            biography: user.biography
+        };
+    }
+
+    static async updateUser(data, userId) {
+
+        const { first_name, last_name, phone_number, postal_address, birthday, avatar, biography } = data
+
+        if (!first_name && !last_name && !phone_number && !postal_address && !birthday && !avatar && !biography) {
+            throw { type: "validation" };
+        }
+
+        // get authenticated user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId }
+        });
+
+        if (!user) {
+            throw { type: "not_found" };
+        }
+
+        const update = {}
+
+        // build update field
+        // allow update if user is providing something
+        if ("first_name" in data) update.first_name = first_name;
+        if ("last_name" in data) update.last_name = last_name;
+        if ("phone_number" in data) update.phone_number = phone_number;
+        if ("postal_address" in data) update.postal_address = postal_address;
+        if ("birthday" in data) update.birthday = birthday;
+        if ("avatar" in data) update.avatar = avatar;
+        if ("biography" in data) update.biography = biography;
+
+        // update the user
+        await prisma.regularUser.update({
+            where: { accountId: userId },
+            data: update
+        });
+
+        return update;
+    }
+
     static async getUsers(data) {
         const { keyword } = data;
         const activated = parseBoolean(data.activated);
@@ -130,6 +206,39 @@ class UserService {
             count,
             results
         };
+    }
+
+    static async updateUserAvailability(data, userId) {
+
+        const available = parseBoolean(data.available);
+
+        // get authenticated user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId }
+        });
+
+        if (!user) {
+            throw { type: "not_found" };
+        }
+
+        // if suspended or has no approved qualifications when setting to true, bad request
+        const approvedQualifications = await prisma.qualification.count({
+            where: {
+                userId: userId,
+                status: "approved"
+            }
+        });
+        if (available && (user.suspended || approvedQualifications === 0)) {
+            throw { type: "validation" };
+        }
+
+        // update the user
+        await prisma.regularUser.update({
+            where: { accountId: userId },
+            data: { available }
+        });
+
+        return { available };
     }
 
     static async updateUserSuspend(data, userId) {
