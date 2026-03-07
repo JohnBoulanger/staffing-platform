@@ -75,4 +75,26 @@ async function updateQualification(req, res) {
     }
 }
 
-module.exports = { createQualification, getQualification, updateQualification, getQualifications };
+async function uploadQualificationDocument(req, res) {
+    try {
+        const userId = req.user?.id;
+        const qualificationId = parseInt(req.params.qualificationId);
+        if (!req.file) {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        const documentUrl = `/uploads/qualifications/${qualificationId}/${req.file.filename}`;
+        const response = await QualificationService.uploadQualificationDocument(documentUrl, qualificationId, userId);
+        return res.status(200).json(response);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { createQualification, getQualification, updateQualification, getQualifications, uploadQualificationDocument };

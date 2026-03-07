@@ -1,9 +1,14 @@
 const express = require("express");
-const { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability } = require("../controllers/userController");
+const { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability, uploadUserAvatar, uploadUserResume } = require("../controllers/userController");
 const jwtAuth = require("../middleware/auth");
+const { uploadAvatar, uploadResume } = require("../middleware/upload");
 
 const router = express.Router();
 
+// upload or replace avatar for authenticated user
+router.put("/me/avatar", jwtAuth, uploadAvatar.single("file"), uploadUserAvatar);
+// upload or replace resume for authenticated user
+router.put("/me/resume", jwtAuth, uploadResume.single("file"), uploadUserResume);
 // set the suspended status of a regular user
 router.patch("/:userId/suspended", updateUserSuspend);
 // update availability status of user

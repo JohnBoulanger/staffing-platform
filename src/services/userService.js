@@ -274,6 +274,52 @@ class UserService {
             postal_address: updated.postal_address ?? ""
         };
     }
+
+    static async uploadUserAvatar(avatarUrl, userId) {
+        if (!avatarUrl) {
+            throw { type: "validation" };
+        }
+
+        // get authenticated user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId }
+        });
+        
+        if (!user) {
+            throw { type: "not_found" };
+        }
+
+        // update the user
+        await prisma.regularUser.update({
+            where: { accountId: userId },
+            data: { avatar: avatarUrl }
+        });
+        
+        return { avatar: avatarUrl };
+    }
+
+    static async uploadUserResume(resumeUrl, userId) {
+        if (!resumeUrl) {
+            throw { type: "validation" };
+        }
+        
+        // get authenticated user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId }
+        });
+        
+        if (!user) {
+            throw { type: "not_found" };
+        }
+        
+        // update the user
+        await prisma.regularUser.update({
+            where: { accountId: userId },
+            data: { resume: resumeUrl }
+        });
+
+        return { resume: resumeUrl };
+    }
 }
 
 module.exports = { UserService };    

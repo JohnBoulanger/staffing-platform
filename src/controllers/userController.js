@@ -15,6 +15,21 @@ async function registerUser(req, res) {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+// retrieve a list of regular users
+async function getUsers(req, res) {
+    try {
+        const users = await UserService.getUsers(req.query);
+        return res.status(200).json(users);
+    }
+    catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 // get specific user
 async function getUser(req, res) {
     try {
@@ -46,20 +61,6 @@ async function updateUser(req, res) {
         }
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not Found" });
-        }
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
-}
-
-// retrieve a list of regular users
-async function getUsers(req, res) {
-    try {
-        const users = await UserService.getUsers(req.query);
-        return res.status(200).json(users);
-    }
-    catch (error) {
-        if (error.type === "validation") {
-            return res.status(400).json({ error: "Bad Request" });
         }
         return res.status(500).json({ error: "Internal Server Error" });
     }
@@ -101,4 +102,46 @@ async function updateUserSuspend(req, res) {
     }
 }
 
-module.exports = { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability };
+// upload or replace avatar for authenticated user
+async function uploadUserAvatar(req, res) {
+    try {
+        const userId = req.user?.id;
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+        const avatarUrl = `/uploads/users/${userId}/${req.file.filename}`;
+        const response = await UserService.uploadUserAvatar(avatarUrl, userId);
+        return res.status(200).json(response);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+// upload or replace resume for authenticated user
+async function uploadUserResume(req, res) {
+    try {
+        const userId = req.user?.id;
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+        const resumeUrl = `/uploads/users/${userId}/${req.file.filename}`;
+        const response = await UserService.uploadUserResume(resumeUrl, userId);
+        return res.status(200).json(response);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability, uploadUserAvatar, uploadUserResume };

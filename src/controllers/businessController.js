@@ -61,5 +61,56 @@ async function getBusinesses(req, res) {
     }
 }
 
+async function getMyBusiness(req, res) {
+    try {
+        const businessId = req.user?.id;
+        const response = await BusinessService.getMyBusiness(businessId);
+        return res.status(200).json(response);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
 
-module.exports = { registerBusiness, verifyBusiness, getBusiness, getBusinesses }
+async function updateMyBusiness(req, res) {
+    try {
+        const businessId = req.user?.id;
+        const response = await BusinessService.updateMyBusiness(req.body, businessId);
+        return res.status(200).json(response);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+async function uploadBusinessAvatar(req, res) {
+    try {
+        const businessId = req.user?.id;
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+        const avatarUrl = `/uploads/users/${businessId}/${req.file.filename}`;
+        const response = await BusinessService.uploadBusinessAvatar(avatarUrl, businessId);
+        return res.status(200).json(response);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar }

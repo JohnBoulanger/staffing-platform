@@ -243,6 +243,126 @@ class BusinessService {
             results
         };
     }
+
+    static async getMyBusiness(businessId) {
+        // get authenticated business
+        const business = await prisma.business.findUnique({
+            where: { accountId: businessId },
+            include: { account: true }
+        });
+
+        if (!business) {
+            throw { type: "not_found" };
+        }
+
+        return {
+            id: business.accountId,
+            business_name: business.business_name,
+            email: business.account.email,
+            role: business.account.role,
+            phone_number: business.phone_number ?? "",
+            postal_address: business.postal_address ?? "",
+            location: {
+                lon: business.lon,
+                lat: business.lat
+            },
+            avatar: business.avatar,
+            biography: business.biography,
+            activated: business.account.activated,
+            verified: business.verified,
+            createdAt: business.account.createdAt,
+        };
+    }
+
+    static async updateMyBusiness(data, businessId) {
+        const { business_name, owner_name, phone_number, postal_address, location, avatar, biography } = data
+
+        if (!business_name && !owner_name && !phone_number && !postal_address && !location && !avatar && !biography) {
+            throw { type: "validation" };
+        }
+
+        // get authenticated business
+        const business = await prisma.business.findUnique({
+            where: { accountId: businessId },
+            include: { account: true }
+        });
+
+        if (!business) {
+            throw { type: "not_found" };
+        }
+
+        const update = {};
+        const response = {};
+        if ("business_name" in data) {
+            update.business_name = business_name;
+            response.business_name = business_name;
+        }
+        if ("owner_name" in data) {
+            update.owner_name = owner_name;
+            response.owner_name = owner_name;
+        }
+        if ("phone_number" in data) {
+            update.phone_number = phone_number;
+            response.phone_number = phone_number;
+        }
+        if ("postal_address" in data) {
+            update.postal_address = postal_address;
+            response.postal_address = postal_address;
+        }
+        if ("location" in data) {
+            if (!location || typeof location.lon !== "number" || typeof location.lat !== "number") {
+                throw { type: "validation" };
+            }
+
+            update.lon = location.lon;
+            update.lat = location.lat;
+
+            response.location = {
+                lon: location.lon,
+                lat: location.lat
+            };
+        }
+        if ("avatar" in data) {
+            update.avatar = avatar;
+            response.avatar = avatar;
+        }
+        if ("biography" in data) {
+            update.biography = biography;
+            response.biography = biography;
+        }
+
+        // update the business
+        await prisma.business.update({
+            where: { accountId: businessId },
+            data: update
+        });
+
+        return response;
+    }
+
+    static async uploadBusinessAvatar(avatarUrl, businessId) {
+        if (!avatarUrl) {
+            throw { type: "validation" };
+        }
+        
+        // get authenticated business
+        const business = await prisma.business.findUnique({
+            where: { accountId: businessId },
+            include: { account: true }
+        });
+
+        if (!business) {
+            throw { type: "not_found" };
+        }
+        
+        // update the business avatar
+        await prisma.business.update({
+            where: { accountId: businessId },
+            data: { avatar: avatarUrl }
+        });
+
+        return { avatar: avatarUrl };
+    }
 }
 
 

@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { createQualification, getQualifications, getQualification, updateQualification } = require("../controllers/qualificationController");
+const { createQualification, getQualifications, getQualification, updateQualification, uploadQualificationDocument } = require("../controllers/qualificationController");
 const jwtAuth = require("../middleware/auth");
+const { uploadDocument } = require("../middleware/upload");
 
+// upload or replace document for authenticated user
+router.put("/:qualificationId/document", jwtAuth, uploadDocument.single("file"), uploadQualificationDocument);
 // retrieve a single qualification request
 router.get("/:qualificationId", jwtAuth, getQualification);
 // update a qualification request

@@ -255,6 +255,36 @@ class QualificationService {
             updatedAt: updated.updatedAt
         };
     }
+
+    static async uploadQualificationDocument(documentUrl, qualificationId, userId) {
+        if (!documentUrl) {
+            throw { type: "validation" };
+        }
+
+        // find qualification
+        const qualification = await prisma.qualification.findUnique({
+            where: { id: qualificationId },
+            include: { user: true }
+        });
+
+        if (!qualification) {
+            throw { type: "not_found" };
+        }
+
+        // check that it matches the authenticated user
+        if (qualification.user.accountId !== userId) {
+            throw { type: "forbidden" };
+        }
+
+        // update document
+        await prisma.qualification.update({
+            where: { id: qualificationId },
+            data: { document: documentUrl }
+        });
+
+        // return new document url
+        return { document: documentUrl };
+    }
 }
 
 module.exports = { QualificationService };
