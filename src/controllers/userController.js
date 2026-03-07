@@ -33,7 +33,7 @@ async function getUsers(req, res) {
 // get specific user
 async function getUser(req, res) {
     try {
-        const userId = req.user?.id;
+        const userId = req.user.id;
         const user = await UserService.getUser(userId);
         return res.status(200).json(user);
     }
@@ -51,7 +51,7 @@ async function getUser(req, res) {
 // updated authenticated user
 async function updateUser(req, res) {
     try {
-        const userId = req.user?.id;
+        const userId = req.user.id;
         const user = await UserService.updateUser(req.body, userId);
         return res.status(200).json(user);
     }
@@ -69,7 +69,7 @@ async function updateUser(req, res) {
 // update user availability
 async function updateUserAvailability(req, res) {
     try {
-        const userId = req.user?.id;
+        const userId = req.user.id;
         const user = await UserService.updateUserAvailability(req.body, userId);
         return res.status(200).json(user);
     }
@@ -105,7 +105,7 @@ async function updateUserSuspend(req, res) {
 // upload or replace avatar for authenticated user
 async function uploadUserAvatar(req, res) {
     try {
-        const userId = req.user?.id;
+        const userId = req.user.id;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
@@ -126,7 +126,7 @@ async function uploadUserAvatar(req, res) {
 // upload or replace resume for authenticated user
 async function uploadUserResume(req, res) {
     try {
-        const userId = req.user?.id;
+        const userId = req.user.id;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
@@ -144,4 +144,30 @@ async function uploadUserResume(req, res) {
     }
 }
 
-module.exports = { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability, uploadUserAvatar, uploadUserResume };
+async function getInvitations(req, res) {
+    try {
+        const userId = req.user.id;
+        const invitations = await UserService.getInvitations(req.query, userId);
+        return res.status(200).json(invitations);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+async function getInterests(req, res) {
+    try {
+        const userId = req.user.id;
+        const interests = await UserService.getInterests(req.query, userId);
+        return res.status(200).json(interests);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability, uploadUserAvatar, uploadUserResume, getInvitations, getInterests };

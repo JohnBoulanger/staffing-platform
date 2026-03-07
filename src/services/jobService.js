@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const haversineDistance = require("../helpers/haversineDistance");
+const { parseBoolean } = require("../helpers/validation");
 const prisma = new PrismaClient();
 
 class JobService {
@@ -202,22 +203,422 @@ class JobService {
         return result
     }
 
-    static async setNoShow(data, jobId) {
-
+    static async setNoShow(jobId) {
+        const now = new Date()
         // find unique job
         const job = await prisma.job.findUnique({
-            where: { id: jobId }
+            where: { id: jobId },
         });
-        
+
+        // handle errors
+        if(!job) {
+            throw { type: "not_found" };
+        }
+
+        // conflicts
+        if (now < job.start_time || now >= job.end_time || job.status !== "filled") {
+            throw { type: "conflict" };
+        }
+
+        // update worker to suspended
+        if (job.workerId) {
+            await prisma.regularUser.update({
+                where: { accountId: job.workerId },
+                data: {
+                    suspended: true
+                }
+            });
+        }
+
+        // update job status to cancelled        
+        const updatedJob = await prisma.job.update({
+            where: { id: jobId },
+            data: {
+                status: "canceled" 
+            }
+        });
+
+        return {
+            id: updatedJob.id,
+            status: updatedJob.status,
+            updatedAt: updatedJob.updatedAt
+        };
     }
 
-    static async setInterested(data, jobId) {
-
+    static async setInterest(data, jobId, userId) {
+        const interested = parseBoolean(data.interested);
         // find unique job
         const job = await prisma.job.findUnique({
             where: { id: jobId }
         });
 
+        // handle errors
+        if(!job) {
+            throw { type: "not_found" };
+        }
+
+        // user trying to withdraw interest from a job they havent expressed interest to
+        const existingInterest = await prisma.interest.findFirst({
+            where: {
+                jobId: jobId,
+                userId: userId
+            }
+        });
+
+        if (!interested && !existingInterest) {
+            throw { type: "validation" };
+        }
+
+        // is user qualified
+        const qualification = await prisma.qualification.findFirst({
+            where: {
+                userId: userId,
+                positionTypeId: job.positionTypeId,
+                status: "approved"
+            }
+        });
+
+        if (!qualification) {
+            throw { type: "forbidden" };
+        }
+
+        // conflict
+        const negotiation = await prisma.negotiation.findFirst({
+            where: {
+                jobId: jobId,
+                userId: userId
+            }
+        });
+
+        if (job.status !== "open" || negotiation) {
+            throw { type: "conflict" };
+        }
+
+        // create or update interest
+        let interest;
+        if (existingInterest) {
+            interest = await prisma.interest.update({
+                where: { id: existingInterest.id },
+                data: { userInterested: interested }
+            });
+        } else {
+            interest = await prisma.interest.create({
+                data: {
+                    jobId: jobId,
+                    userId: userId,
+                    userInterested: interested
+                }
+            });
+        }
+
+        return {
+            id: interest.id,
+            job_id: interest.jobId,
+            candidate: {
+                id: interest.userId,
+                interested: interest.userInterested
+            },
+            business: {
+                id: job.businessId,
+                interested: interest.businessInterested ?? null
+            }
+        };
+    }
+
+    static async getCandidates(data, jobId, businessId) {
+        const page = parseInt(data.page) || 1;
+        const limit = parseInt(data.limit) || 10;
+        const skip = (page - 1) * limit;
+        // find the specific candidates who meet qualifications
+        const job = await prisma.job.findUnique({
+            where: { id: jobId }
+        });
+
+        // job does not belong to authenticated business
+        if (!job || job.businessId !== businessId) {
+            throw { type: "not_found" };
+        }
+        // find the qualified users for the job
+        const qualifiedUsers = await prisma.regularUser.findMany({
+            where: {
+                qualifications: {
+                    some: {
+                        positionTypeId: job.positionTypeId,
+                        status: "approved"
+                    }
+                }
+            },
+            include: {
+                account: true,
+                jobs: true
+            }
+        });
+
+        // determine which users dont have conflicting jobs with the job in question
+        const discoverableUsers = qualifiedUsers.filter(user => {
+            const conflict = user.jobs.some(j => j.status === "filled" && j.start_time < job.end_time && j.end_time > job.start_time);
+            return !conflict;
+        });
+
+        // get all associated interests where businesses are interested
+        const interests = await prisma.interest.findMany({
+            where: {
+                jobId: jobId,
+                businessInterested: true
+            }
+        });
+
+        // users invited for the job in question
+        const invitedIds = new Set(interests.map(i => i.userId));
+        // format response
+        const count = discoverableUsers.length;
+        const paginatedUsers = discoverableUsers.slice(skip, skip + limit);
+        const results = paginatedUsers.map(user => ({
+            id: user.accountId,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            invited: invitedIds.has(user.accountId)
+        }));
+
+        return { count, results };
+    }
+
+    static async getUserCandidates(data, jobId, userId, businessId) {
+        // find the unique job
+        const job = await prisma.job.findUnique({
+            where: { id: jobId },
+            include: {
+                positionType: true
+            }
+        });
+
+        // job does not belong to authenticated business
+        if (!job || job.businessId !== businessId) {
+            throw { type: "not_found" };
+        }
+
+        // find the candidate user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId },
+            include: {
+                account: true,
+                qualifications: true,
+                jobs: true
+            }
+        });
+
+        // user does not exist
+        if (!user) {
+            throw { type: "not_found" };
+        }
+
+        // get the qualification for this jobs position type
+        const qualification = user.qualifications.find(q =>
+            q.positionTypeId === job.positionTypeId && q.status === "approved"
+        );
+
+        // user is not qualified for this job
+        if (!qualification) {
+            throw { type: "forbidden" };
+        }
+
+        // determine if the user has conflicting jobs
+        const conflict = user.jobs.some(j =>
+            j.status === "filled" &&
+            j.start_time < job.end_time &&
+            j.end_time > job.start_time
+        );
+
+        const now = new Date();
+
+        // user is not discoverable unless they filled this job and it hasn't ended
+        if (conflict && !(job.workerId === userId && now < job.end_time)) {
+            throw { type: "forbidden" };
+        }
+
+        // construct user response object
+        const userResponse = {
+            id: user.accountId,
+            first_name: user.account.first_name,
+            last_name: user.account.last_name,
+            avatar: user.avatar,
+            resume: user.resume,
+            biography: user.biography,
+            qualification: {
+                id: qualification.id,
+                position_type_id: qualification.positionTypeId,
+                document: qualification.document,
+                note: qualification.note,
+                updatedAt: qualification.updatedAt
+            }
+        };
+
+        // only include email and phone if the candidate filled this job
+        if (job.workerId === userId) {
+            userResponse.email = user.account.email;
+            userResponse.phone_number = user.phone_number;
+        }
+
+        // construct job response object
+        const jobResponse = {
+            id: job.id,
+            status: job.status,
+            position_type: {
+                id: job.positionType.id,
+                name: job.positionType.name,
+                description: job.positionType.description
+            },
+            start_time: job.start_time,
+            end_time: job.end_time
+        };
+
+        return {
+            user: userResponse,
+            job: jobResponse
+        };
+    }
+
+    static async updateInterestInCandidate(data, jobId, userId, businessId) {
+        const interested = parseBoolean(data.interested);
+
+        // find the unique job
+        const job = await prisma.job.findUnique({
+            where: { id: jobId }
+        });
+
+        // job does not belong to authenticated business or isnt open
+        if (!job || job.businessId !== businessId) {
+            throw { type: "not_found" };
+        }
+        if (job.status !== "open") {
+            throw { type: "conflict" };
+        }
+
+        // find the candidate user
+        const user = await prisma.regularUser.findUnique({
+            where: { accountId: userId },
+            include: {
+                jobs: true
+            }
+        });
+
+        // user does not exist
+        if (!user) {
+            throw { type: "not_found" };
+        }
+
+        // determine if the user has conflicting jobs
+        const conflict = user.jobs.some(j =>
+            j.status === "filled" &&
+            j.start_time < job.end_time &&
+            j.end_time > job.start_time
+        );
+
+        // user is no longer discoverable
+        if (conflict) {
+            throw { type: "forbidden" };
+        }
+
+        // find existing interest for this job/user
+        const existingInterest = await prisma.interest.findFirst({
+            where: {
+                jobId: jobId,
+                userId: userId
+            }
+        });
+
+        // withdrawing invitation when none exists
+        if (!interested && (!existingInterest || !existingInterest.businessInterested)) {
+            throw { type: "validation" };
+        }
+
+        // update existing interest
+        let interest;
+        if (existingInterest) {
+            interest = await prisma.interest.update({
+                where: { id: existingInterest.id },
+                data: { businessInterested: interested }
+            });
+        }
+        // create new interest record
+        else {
+            interest = await prisma.interest.create({
+                data: {
+                    jobId: jobId,
+                    userId: userId,
+                    businessInterested: true,
+                    userInterested: false
+                }
+            });
+        }
+
+        // format response
+        return {
+            id: interest.id,
+            job_id: jobId,
+            candidate: {
+                id: userId,
+                interested: interest.userInterested
+            },
+            business: {
+                id: businessId,
+                interested: interest.businessInterested
+            }
+        };
+    }
+
+    static async getInterests(data, jobId, businessId) {
+        const page = parseInt(data.page) || 1;
+        const limit = parseInt(data.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // find the unique job
+        const job = await prisma.job.findUnique({
+            where: { id: jobId }
+        });
+
+        // job does not belong to authenticated business
+        if (!job || job.businessId !== businessId) {
+            throw { type: "not_found" };
+        }
+
+        // count total users interested in this job
+        const count = await prisma.interest.count({
+            where: {
+                jobId: jobId,
+                userInterested: true
+            }
+        });
+
+        // find users interested in this job
+        const interests = await prisma.interest.findMany({
+            where: {
+                jobId: jobId,
+                userInterested: true
+            },
+            include: {
+                user: {
+                    include: {
+                        account: true
+                    }
+                }
+            },
+            skip,
+            take: limit
+        });
+
+        // format response
+        const results = interests.map(interest => ({
+            interest_id: interest.id,
+            mutual: interest.businessInterested === true,
+            user: {
+                id: interest.userId,
+                first_name: interest.user.first_name,
+                last_name: interest.user.last_name
+            }
+        }));
+
+        return { count, results };
     }
 }
 

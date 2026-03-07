@@ -320,6 +320,118 @@ class UserService {
 
         return { resume: resumeUrl };
     }
+
+    static async getInvitations(data, userId) {
+        const page = parseInt(data.page) || 1;
+        const limit = parseInt(data.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // find jobs where business is interested in the user
+        const interests = await prisma.interest.findMany({
+            where: {
+                userId: userId,
+                businessInterested: true,
+                userInterested: { not: true }
+            },
+            include: {
+                job: {
+                    include: {
+                        positionType: true,
+                        business: true
+                    }
+                }
+            },
+            skip,
+            take: limit
+        });
+
+        // get total jobs listed
+        const count = await prisma.interest.count({
+            where: {
+                userId: userId,
+                businessInterested: true,
+                userInterested: { not: true }
+            }
+        });
+
+        // format response
+        const results = interests.map(interest => ({
+            id: interest.job.id,
+            status: interest.job.status,
+            position_type: {
+                id: interest.job.positionType.id,
+                name: interest.job.positionType.name
+            },
+            business: {
+                id: interest.job.business.id,
+                business_name: interest.job.business.business_name
+            },
+            salary_min: interest.job.salary_min,
+            salary_max: interest.job.salary_max,
+            start_time: interest.job.start_time,
+            end_time: interest.job.end_time,
+            updatedAt: interest.job.updatedAt
+        }));
+
+        return { count, results };
+    }
+
+    static async getInterests(data, userId) {
+        const page = parseInt(data.page) || 1;
+        const limit = parseInt(data.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // get total number of jobs where the user is interested
+        const count = await prisma.interest.count({
+            where: {
+                userId: userId,
+                userInterested: true 
+            }
+        });
+
+        // find jobs where the user has expressed interest
+        const interests = await prisma.interest.findMany({
+            where: {
+                userId: userId,
+                userInterested: true
+            },
+            include: {
+                job: {
+                    include: {
+                        positionType: true,
+                        business: true
+                    }
+                }
+            },
+            skip,
+            take: limit
+        });
+
+        // format response
+        const results = interests.map(interest => ({
+            interest_id: interest.id,
+            mutual: interest.userInterested && interest.businessInterested ? true : false,
+            job: {
+                id: interest.job.id,
+                status: interest.job.status,
+                position_type: {
+                    id: interest.job.positionType.id,
+                    name: interest.job.positionType.name
+                },
+                business: {
+                    id: interest.job.business.id,
+                    business_name: interest.job.business.business_name
+                },
+                salary_min: interest.job.salary_min,
+                salary_max: interest.job.salary_max,
+                start_time: interest.job.start_time,
+                end_time: interest.job.end_time,
+                updatedAt: interest.job.updatedAt
+            }
+        }));
+
+        return { count, results };
+    }
 }
 
 module.exports = { UserService };    

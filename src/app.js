@@ -8,6 +8,7 @@ const positionTypeRoutes = require("./routes/positionTypes")
 const jobRoutes = require("./routes/jobs");
 const qualificationRoutes = require("./routes/qualifications");
 const systemsRoutes = require("./routes/system");
+const negotiationRoutes = require("./routes/negotiations")
 
 function create_app() {
     const app = express();
@@ -20,6 +21,7 @@ function create_app() {
     app.use("/jobs", jobRoutes);
     app.use("/qualifications", qualificationRoutes);
     app.use("/system", systemsRoutes);
+    app.use("/negotiations", negotiationRoutes);
 
     return app;
 }

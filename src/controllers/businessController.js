@@ -34,7 +34,7 @@ async function verifyBusiness(req, res) {
 async function getBusiness(req, res) {
     try {
         const businessId = parseInt(req.params.businessId);
-        const requesterRole = req.user?.role;
+        const requesterRole = req.user.role;
         const response = await BusinessService.getBusiness(businessId, requesterRole);
         return res.status(200).json(response);
     } catch (error) {
@@ -47,7 +47,7 @@ async function getBusiness(req, res) {
 
 async function getBusinesses(req, res) {
     try {
-        const requesterRole = req.user?.role;
+        const requesterRole = req.user.role;
         const response = await BusinessService.getBusinesses(req.query, requesterRole);
         return res.status(200).json(response);
     } catch (error) {
@@ -63,7 +63,7 @@ async function getBusinesses(req, res) {
 
 async function getMyBusiness(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         const response = await BusinessService.getMyBusiness(businessId);
         return res.status(200).json(response);
     } catch (error) {
@@ -79,7 +79,7 @@ async function getMyBusiness(req, res) {
 
 async function updateMyBusiness(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         const response = await BusinessService.updateMyBusiness(req.body, businessId);
         return res.status(200).json(response);
     } catch (error) {
@@ -95,7 +95,7 @@ async function updateMyBusiness(req, res) {
 
 async function uploadBusinessAvatar(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
@@ -115,7 +115,7 @@ async function uploadBusinessAvatar(req, res) {
 
 async function createJob(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         const job = await BusinessService.createJob(req.body, businessId);
         return res.status(201).json(job);
     } catch (error) {
@@ -134,7 +134,7 @@ async function createJob(req, res) {
 
 async function getJobs(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         const jobs = await BusinessService.getJobs(req.query, businessId);
         return res.status(200).json(jobs);
     } catch (error) {
@@ -150,7 +150,7 @@ async function getJobs(req, res) {
 
 async function updateJob(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
             return res.status(400).json({ error: "Bad Request" });
@@ -173,7 +173,7 @@ async function updateJob(req, res) {
 
 async function deleteJob(req, res) {
     try {
-        const businessId = req.user?.id;
+        const businessId = req.user.id;
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
             return res.status(400).json({ error: "Bad Request" });
