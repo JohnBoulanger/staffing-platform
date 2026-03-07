@@ -445,6 +445,190 @@ class BusinessService {
             updatedAt: job.updatedAt
         };
     }
+
+    static async getJobs(data, businessId) {
+        const { start_time, end_time, status } = data;
+        const position_type_id = parseInt(data.position_type_id);
+        const salary_min = parseInt(data.salary_min);
+        const salary_max = parseInt(data.salary_max);
+        const page = parseInt(data.page) || 1;
+        const limit = parseInt(data.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // if start and end times are provided, check that they are valid
+        const start = start_time ? new Date(start_time) : undefined;
+        const end = end_time ? new Date(end_time) : undefined;
+        if ((start && isNaN(start.getTime())) || (end && isNaN(end.getTime()))) {
+            throw { type: "validation" };
+        }
+
+        // default statuses
+        let statuses = ["open", "filled"];
+        if (status) {
+            if (Array.isArray(status)) {
+                statuses = status;
+            } else {
+                statuses = [status];
+            }
+        }
+
+        // create where clause
+        const where = {
+            businessId: businessId,
+            status: { in: statuses }
+        };
+        if (!isNaN(position_type_id)) {
+            where.positionTypeId = position_type_id;
+        }
+        if (!isNaN(salary_min)) {
+            where.salary_min = { gte: salary_min };
+        }
+        if (!isNaN(salary_max)) {
+            where.salary_max = { lte: salary_max };
+        }
+        if (start) {
+            where.start_time = { gte: start };
+        }
+        if (end) {
+            where.end_time = { lte: end };
+        }
+
+        const count = await prisma.job.count({ where });
+
+        const jobs = await prisma.job.findMany({
+            where,
+            take: limit,
+            skip,
+            include: {
+                positionType: true,
+                worker: true
+            }
+        });
+
+        const results = jobs.map(job => ({
+            id: job.id,
+            status: job.status,
+            position_type: {
+                id: job.positionType.id,
+                name: job.positionType.name
+            },
+            business_id: businessId,
+            worker: job.worker ? {
+                id: job.worker.accountId,
+                first_name: job.worker.first_name,
+                last_name: job.worker.last_name
+            } : null,
+            salary_min: job.salary_min,
+            salary_max: job.salary_max,
+            start_time: job.start_time,
+            end_time: job.end_time,
+            updatedAt: job.updatedAt
+        }));
+
+        return { 
+            count, 
+            results
+        };
+    }
+
+    static async updateJob(data, businessId, jobId) {
+        const now = new Date();
+        const { start_time, end_time, note } = data;
+        const salary_min = parseInt(data.salary_min);
+        const salary_max = parseInt(data.salary_max);
+
+        // if start and end times are provided, check that they are valid
+        const start = start_time ? new Date(start_time) : undefined;
+        const end = end_time ? new Date(end_time) : undefined;
+        if ((start && isNaN(start.getTime())) || (end && isNaN(end.getTime()))) {
+            throw { type: "validation" };
+        }
+
+        const job = await prisma.job.findUnique({
+            where: { id: jobId }
+        });
+
+        // check if job exists and is open and available and belongs to the business
+        if (!job || job.businessId !== businessId) {
+            throw { type: "not_found" };
+        }
+        if (job.status !== "open" || now >= job.start_time) {
+            throw { type: "conflict" };
+        }
+        // validate salary values
+        if (!isNaN(salary_min) && salary_min < 0) {
+            throw { type: "validation" };
+        }
+        if (!isNaN(salary_max) && !isNaN(salary_min) && salary_max < salary_min) {
+            throw { type: "validation" };
+        }
+        // validate time values
+        if (start && end && end <= start) {
+            throw { type: "validation" };
+        }
+
+        // build update
+        const update = {};
+        const response = {};
+
+        if ("salary_min" in data) {
+            update.salary_min = salary_min;
+            response.salary_min = salary_min;
+        }
+        if ("salary_max" in data) {
+            update.salary_max = salary_max;
+            response.salary_max = salary_max;
+        }
+        if ("start_time" in data) {
+            update.start_time = start;
+            response.start_time = start;
+        }
+        if ("end_time" in data) {
+            update.end_time = end;
+            response.end_time = end;
+        }
+        if ("note" in data) {
+            update.note = note;
+            response.note = note;
+        }
+
+        const updated = await prisma.job.update({
+            where: { id: jobId },
+            data: update
+        });
+
+        // format response
+        response.id = updated.id;
+        response.updatedAt = updated.updatedAt;
+
+        return response;
+    }
+
+    static async deleteJob(businessId, jobId) {
+        // find matching job
+        const job = await prisma.job.findUnique({
+            where: { id: jobId }
+        });
+
+        // count number of active negotiations
+        const countNegotiations = await prisma.negotiation.count({
+            where: { 
+                jobId
+            }
+        });
+
+        // check if job exists and is open and available and belongs to the business
+        if (!job || job.businessId !== businessId) {
+            throw { type: "not_found" };
+        }
+        if ((job.status !== "open" && job.status !== "expired") || countNegotiations > 0) {
+            throw { type: "conflict" };
+        }
+
+        await prisma.job.delete({
+            where: { id: jobId }
+        });
+    }
 }
 
 

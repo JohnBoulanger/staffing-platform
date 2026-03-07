@@ -132,4 +132,66 @@ async function createJob(req, res) {
     }
 }
 
-module.exports = { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar, createJob }
+async function getJobs(req, res) {
+    try {
+        const businessId = req.user?.id;
+        const jobs = await BusinessService.getJobs(req.query, businessId);
+        return res.status(200).json(jobs);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+async function updateJob(req, res) {
+    try {
+        const businessId = req.user?.id;
+        const jobId = parseInt(req.params.jobId);
+        if (isNaN(jobId)) {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        const response = await BusinessService.updateJob(req.body, businessId, jobId);
+        return res.status(200).json(response);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        if (error.type === "conflict") {
+            return res.status(409).json({ error: "Conflict" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+async function deleteJob(req, res) {
+    try {
+        const businessId = req.user?.id;
+        const jobId = parseInt(req.params.jobId);
+        if (isNaN(jobId)) {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        const response = await BusinessService.deleteJob(businessId, jobId);
+        return res.status(204).send();
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        if (error.type === "conflict") {
+            return res.status(409).json({ error: "Conflict" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar, createJob, getJobs, updateJob, deleteJob }

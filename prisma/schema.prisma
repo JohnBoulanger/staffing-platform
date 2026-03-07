@@ -149,7 +149,7 @@ model Job {
 
 model Interest {
   id                 Int           @id @default(autoincrement())
-  job                Job           @relation(fields: [jobId], references: [id])
+  job                Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId              Int
   user               RegularUser   @relation(fields: [userId], references: [accountId])
   userId             Int
@@ -164,7 +164,7 @@ model Interest {
 
 model Negotiation {
   id                  Int                  @id @default(autoincrement())
-  job                 Job                  @relation(fields: [jobId], references: [id])
+  job                 Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId               Int
   user                RegularUser          @relation(fields: [userId], references: [accountId])
   userId              Int
@@ -183,7 +183,7 @@ model Negotiation {
 
 model NegotiationMessage {
   id              Int         @id @default(autoincrement())
-  negotiation     Negotiation @relation(fields: [negotiationId], references: [id])
+  negotiation     Negotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
   negotiationId   Int
   sender          Account     @relation(fields: [senderAccountId], references: [id])
   senderAccountId Int
