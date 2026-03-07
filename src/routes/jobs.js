@@ -1,11 +1,11 @@
 const express = require("express");
-const { createJob, getJob, getJobs } = require("../controllers/jobController");
+const { getJobs } = require("../controllers/jobController");
 
 const router = express.Router()
 
-router.get("/:jobId", getJob);
+router.get("/:jobId/interested");
+router.patch("/:jobId/no-show");
+// retrieve a paginated list of open job postings
 router.get("/", getJobs);
-router.post("/", createJob)
-router.patch("/:jobId", )
 
 module.exports = router

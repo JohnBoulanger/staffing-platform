@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { isValidEmail, isValidPassword, parseBoolean } = require("../helpers/validation");
 const encodePassword = require("../helpers/encodePassword");
+const { jobStartWindow } = require("../config/system");
 
 class BusinessService {
     static async registerBusiness(data) {
@@ -362,6 +363,87 @@ class BusinessService {
         });
 
         return { avatar: avatarUrl };
+    }
+
+    static async createJob(data, businessId) {
+        // data validation
+        const now = new Date();
+        const { start_time, end_time, note } = data;
+        const position_type_id = parseInt(data.position_type_id);
+        const salary_min = parseInt(data.salary_min);
+        const salary_max = parseInt(data.salary_max);
+        // type validation
+        if (!start_time || !end_time || isNaN(position_type_id) || isNaN(salary_min) || isNaN(salary_max)) {
+            throw { type: "validation" };
+        }
+        const start =  new Date(start_time);
+        const end = new Date(end_time);
+
+        // value validation
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start || salary_min < 0 || salary_max < salary_min || start < now || end < now) {
+            throw { type: "validation" };
+        }
+
+        // start window validation
+        const maxStart = new Date(now.getTime() + jobStartWindow * 24 * 60 * 60 * 1000);
+        if (start > maxStart) {
+            throw { type: "validation" };
+        }
+
+        // find business and position type
+        const business = await prisma.business.findUnique({
+            where: { accountId: businessId }
+        });
+
+        const positionType = await prisma.positionType.findUnique({
+            where: { id: position_type_id }
+        });
+
+        if (!business || !positionType) {
+            throw { type: "not_found" };
+        }
+
+        // not allowed to create jobs
+        if (!business.verified) {
+            throw { type: "forbidden" };
+        }
+
+        // link job to existing business and positionType
+        const job = await prisma.job.create({
+            data: {
+                businessId: businessId,
+                positionTypeId: position_type_id,
+                salary_min,
+                salary_max,
+                start_time: start,
+                end_time: end,
+                note
+            },
+            include: {
+                business: true,
+                positionType: true
+            }
+        });
+
+        return {
+            id: job.id,
+            status: job.status,
+            position_type: {
+                id: job.positionType.id,
+                name: job.positionType.name
+            },
+            business: {
+                id: job.business.accountId,
+                business_name: job.business.business_name
+            },
+            worker: null,
+            note: job.note,
+            salary_min: job.salary_min,
+            salary_max: job.salary_max,
+            start_time: job.start_time,
+            end_time: job.end_time,
+            updatedAt: job.updatedAt
+        };
     }
 }
 

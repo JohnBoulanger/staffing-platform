@@ -1,16 +1,16 @@
 
 const { JobService } = require("../services/jobService");
 
-async function createJob(req, res) {
-
-}
-
-async function getJob(req, res) {
-    
-}
-
 async function getJobs(req, res) {
-    
+    try {
+        const jobs = await JobService.getJobs(req.query);
+        return res.status(200).json(jobs);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
 }
 
-module.exports = { createJob, getJob, getJobs };
+module.exports = { getJobs };

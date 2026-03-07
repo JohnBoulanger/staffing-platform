@@ -1,6 +1,6 @@
 let resetCooldown = 60; // seconds
 let negotiationWindow = 600;
-let jobStartWindow = 24;
+let jobStartWindow = 7; // days (1 week)
 let availabilityTimeout = 300;
 
 module.exports = {

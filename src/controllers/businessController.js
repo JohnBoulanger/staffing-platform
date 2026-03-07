@@ -113,4 +113,23 @@ async function uploadBusinessAvatar(req, res) {
     }
 }
 
-module.exports = { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar }
+async function createJob(req, res) {
+    try {
+        const businessId = req.user?.id;
+        const job = await BusinessService.createJob(req.body, businessId);
+        return res.status(201).json(job);
+    } catch (error) {
+        if (error.type === "validation") {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+        if (error.type === "not_found") {
+            return res.status(404).json({ error: "Not Found" });
+        }
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+module.exports = { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar, createJob }

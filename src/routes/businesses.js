@@ -1,9 +1,12 @@
 const express = require("express");
-const { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar } = require("../controllers/businessController");
+const { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar, createJob } = require("../controllers/businessController");
 const jwtAuth = require("../middleware/auth");
 const { uploadAvatar } = require("../middleware/upload");
 
 const router = express.Router()
+
+// create a new job posting owned by the authenticated business
+router.post("/me/jobs", jwtAuth, createJob);
 // upload or replace avatar for business
 router.put("/me/avatar", jwtAuth, uploadAvatar.single("file"), uploadBusinessAvatar);
 // retrieve the authenticated business profile
