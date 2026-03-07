@@ -6,7 +6,7 @@ const { createNegotiation, getNegotiations, setDecision } = require("../controll
 const router = express.Router();
 
 // start a negotiation for a job
-router.post("/", createNegotiation);
+router.post("/", jwtAuth, createNegotiation);
 // retrieve the authenticated users' current negotiation
 router.get("/me", jwtAuth, getNegotiations);
 // set the authenticated party's decision for an active negotiation

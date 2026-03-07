@@ -2,8 +2,8 @@ const { NegotiationService } = require("../services/negotiationService");
 
 async function createNegotiation(req, res) {
     try {
-        const userId = req.user.id
-        const result = await NegotiationService.createNegotiation(req.body, userId);
+        const user = req.user;
+        const result = await NegotiationService.createNegotiation(req.body, user);
         return res.status(result.created ? 201 : 200).json(result.negotiation);
     } catch (error) {
         if (error.type === "validation") {
@@ -24,8 +24,8 @@ async function createNegotiation(req, res) {
 
 async function getNegotiations(req, res) {
     try {
-        const userId = req.user.id
-        const negotiations = await NegotiationService.getNegotiations(userId);
+        const user = req.user;
+        const negotiations = await NegotiationService.getNegotiations(user);
         return res.status(200).json(negotiations);
     } catch (error) {
         if (error.type === "validation") {
@@ -40,8 +40,8 @@ async function getNegotiations(req, res) {
 
 async function setDecision(req, res) {
     try {
-        const userId = req.user.id
-        const response = await NegotiationService.setDecision(req.body, userId);
+        const user = req.user;
+        const response = await NegotiationService.setDecision(req.body, user);
         return res.status(200).json(response);
     } catch (error) {
         if (error.type === "validation") {

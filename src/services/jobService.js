@@ -439,8 +439,8 @@ class JobService {
         // construct user response object
         const userResponse = {
             id: user.accountId,
-            first_name: user.account.first_name,
-            last_name: user.account.last_name,
+            first_name: user.first_name,
+            last_name: user.last_name,
             avatar: user.avatar,
             resume: user.resume,
             biography: user.biography,

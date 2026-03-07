@@ -5,26 +5,20 @@ async function authenticateAccount(req, res) {
 
     try {
         const { email, password } = req.body;
-
         // didnt provide email or password
         if (!email || !password) {
             return res.status(400).json({ error: "Bad Request" });
         }
-
         const result = await AuthService.authenticateAccount(email, password);
-
         return res.status(200).json(result);
     }
     catch (error) {
-
         if (error.type === "unauthorized") {
             return res.status(401).json({ error: "Unauthorized" });
         }
-
         if (error.type === "forbidden") {
             return res.status(403).json({ error: "Account Not Activated" });
         }
-
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
