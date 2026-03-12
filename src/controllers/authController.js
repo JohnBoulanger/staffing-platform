@@ -30,14 +30,16 @@ async function createResetToken(req, res) {
         if (!email) {
             return res.status(400).json({ error: "Bad Request" });
         }
-        const resetToken = await AuthService.createResetToken(email);
+        const resetToken = await AuthService.createResetToken(email, req.ip);
         return res.status(202).json(resetToken);
     }
     catch (error) {
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not Found" });
         }
-
+        if (error.type === "rate_limit") {
+            return res.status(429).json({ error: "Too Many Requests" });
+        }
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }

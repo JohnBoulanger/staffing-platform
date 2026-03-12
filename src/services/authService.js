@@ -6,6 +6,9 @@ const { PrismaClient } = require("@prisma/client");
 const { isValidPassword } = require("../helpers/validation");
 const encodePassword = require("../helpers/encodePassword");
 const prisma = new PrismaClient();
+const system = require("../config/system");
+
+const resetRequests = {};
 
 class AuthService {
     static async authenticateAccount(email, password) {
@@ -48,7 +51,18 @@ class AuthService {
         return { token: token, expiresAt: expiryDate };
     }
 
-    static async createResetToken(email) {
+    static async createResetToken(email, ip) {
+
+        // handle rate limit
+        const now = Date.now();
+
+        if (resetRequests[ip]) {
+            const diff = (now - resetRequests[ip]) / 1000;
+
+            if (diff < system.resetCooldown) {
+                throw { type: "rate_limit" };
+            }
+        }
 
         // find account associated with email
         const account = await prisma.account.findUnique({
@@ -70,12 +84,13 @@ class AuthService {
             }
         });
 
+        resetRequests[ip] = now;
+
         return {
             expiresAt,
             resetToken: reset.token
         };
     }
-
 
     static async useResetToken(email, password, resetToken) {
         
@@ -85,10 +100,10 @@ class AuthService {
         });
 
         // check if account exists, token matches, and token not expired
-        if (reset && reset.account.email !== email) {
+        if (!reset || reset.account.email !== email) {
             throw { type: "unauthorized" };
         }
-        if (!reset || reset.used) {
+        if (reset.used) {
             throw { type: "not_found" };
         }
         if (reset.expiresAt < new Date()) {
