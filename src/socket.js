@@ -6,7 +6,7 @@ require('dotenv').config();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const SECRET = process.env.JWT_SECRET || "test_secret";
+const SECRET_KEY = process.env.JWT_SECRET || "test_secret";
 
 let io;
 function attach_sockets(server) {
@@ -24,7 +24,7 @@ function attach_sockets(server) {
     // associate socket with user and join the room
     try {
       // verify the token and store id and role and join a room
-      const userData = jwt.verify(token, SECRET);
+      const userData = jwt.verify(token, SECRET_KEY);
       socket.userId = userData.accountId;
       socket.role = userData.role;
       socket.join(`account:${userData.accountId}`);
