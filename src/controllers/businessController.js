@@ -18,6 +18,9 @@ async function registerBusiness(req, res) {
 async function verifyBusiness(req, res) {
     try {
         const businessId = parseInt(req.params.businessId);
+        if (isNaN(businessId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const response = await BusinessService.verifyBusiness(req.body, businessId);
         return res.status(200).json(response);
     } catch (error) {
@@ -34,6 +37,9 @@ async function verifyBusiness(req, res) {
 async function getBusiness(req, res) {
     try {
         const businessId = parseInt(req.params.businessId);
+        if (isNaN(businessId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const requesterRole = req.user ? req.user.role : null;;
         const response = await BusinessService.getBusiness(businessId, requesterRole);
         return res.status(200).json(response);
@@ -153,7 +159,7 @@ async function updateJob(req, res) {
         const businessId = req.user ? req.user.id : null;;
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const response = await BusinessService.updateJob(req.body, businessId, jobId);
         return res.status(200).json(response);
@@ -176,7 +182,7 @@ async function deleteJob(req, res) {
         const businessId = req.user ? req.user.id : null;;
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const response = await BusinessService.deleteJob(businessId, jobId);
         return res.status(204).send();

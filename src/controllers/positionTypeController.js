@@ -30,6 +30,9 @@ async function getPositionTypes(req, res) {
 async function updatePositionType(req, res) {
     try {
         const positionTypeId = parseInt(req.params.positionTypeId);
+        if (isNaN(positionTypeId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const response = await PositionTypeService.updatePositionType(req.body, positionTypeId);
         return res.status(200).json(response);
     }
@@ -47,6 +50,9 @@ async function updatePositionType(req, res) {
 async function deletePositionType(req, res) {
     try {
         const positionTypeId = parseInt(req.params.positionTypeId);
+        if (isNaN(positionTypeId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         await PositionTypeService.deletePositionType(positionTypeId);
         return res.status(204).send();
     }

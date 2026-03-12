@@ -17,6 +17,9 @@ async function getJobs(req, res) {
 async function getJob(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
+        if (isNaN(jobId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const user = req.user;
         const job = await JobService.getJob(req.query, jobId, user);
         return res.status(200).json(job);
@@ -38,7 +41,7 @@ async function setNoShow(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const response = await JobService.setNoShow(jobId);
         return res.status(200).json(response);
@@ -61,7 +64,7 @@ async function setInterest(req, res) {
         const jobId = parseInt(req.params.jobId);
         const userId = req.user ? req.user.id : null;;
         if (isNaN(jobId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const response = await JobService.setInterest(req.body, jobId, userId);
         return res.status(200).json(response);
@@ -87,7 +90,7 @@ async function getCandidates(req, res) {
         const jobId = parseInt(req.params.jobId);
         const businessId = req.user ? req.user.id : null;;
         if (isNaN(jobId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const candidates = await JobService.getCandidates(req.query, jobId, businessId);
         return res.status(200).json(candidates);
@@ -108,7 +111,7 @@ async function getUserCandidates(req, res) {
         const userId = parseInt(req.params.userId);
         const businessId = req.user ? req.user.id : null;;
         if (isNaN(jobId) || isNaN(userId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const userCandidates = await JobService.getUserCandidates(req.query, jobId, userId, businessId);
         return res.status(200).json(userCandidates);
@@ -132,7 +135,7 @@ async function updateInterestInCandidate(req, res) {
         const userId = parseInt(req.params.userId);
         const businessId = req.user ? req.user.id : null;;
         if (isNaN(jobId) || isNaN(userId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const response = await JobService.updateInterestInCandidate(req.body, jobId, userId, businessId);
         return res.status(200).json(response);
@@ -158,7 +161,7 @@ async function getInterests(req, res) {
         const jobId = parseInt(req.params.jobId);
         const businessId = req.user ? req.user.id : null;;
         if (isNaN(jobId)) {
-            return res.status(400).json({ error: "Bad Request" });
+            return res.status(404).json({ error: "Not Found" });
         }
         const interests = await JobService.getInterests(req.query, jobId, businessId);
         return res.status(200).json(interests);

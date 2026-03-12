@@ -3,7 +3,7 @@ const { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusin
 const jwtAuth = require("../middleware/auth");
 const { uploadAvatar } = require("../middleware/upload");
 
-const router = express.Router()
+const router = express.Router();
 
 // edit an existing job
 // delete an open or expired job posting
@@ -62,4 +62,4 @@ router.route("/")
         res.status(405).json({ error: "Method Not Allowed" });
     });
 
-module.exports = router
+module.exports = router;

@@ -40,6 +40,9 @@ async function getQualification(req, res) {
     try {
         const requester = req.user;
         const qualificationId = parseInt(req.params.qualificationId);
+        if (isNaN(qualificationId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const response = await QualificationService.getQualification(qualificationId, requester);
         return res.status(200).json(response);
     }
@@ -58,6 +61,9 @@ async function updateQualification(req, res) {
     try {
         const requester = req.user;
         const qualificationId = parseInt(req.params.qualificationId);
+        if (isNaN(qualificationId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const response = await QualificationService.updateQualification(req.body, qualificationId, requester);
         return res.status(200).json(response);
     }
@@ -79,6 +85,9 @@ async function uploadQualificationDocument(req, res) {
     try {
         const userId = req.user ? req.user.id : null;;
         const qualificationId = parseInt(req.params.qualificationId);
+        if (isNaN(qualificationId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         if (!req.file) {
             return res.status(400).json({ error: "Bad Request" });
         }

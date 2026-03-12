@@ -88,6 +88,9 @@ async function updateUserAvailability(req, res) {
 async function updateUserSuspend(req, res) {
     try {
         const userId = parseInt(req.params.userId);
+        if (isNaN(userId)) {
+            return res.status(404).json({ error: "Not Found" });
+        }
         const response = await UserService.updateUserSuspend(req.body, userId);
         return res.status(200).json(response);
     }
