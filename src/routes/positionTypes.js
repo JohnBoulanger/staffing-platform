@@ -11,6 +11,10 @@ router.patch("/:positionTypeId", updatePositionType);
 router.delete("/:positionTypeId", deletePositionType);
 // retrieve a list of position types
 router.get("/", getPositionTypes);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 
 module.exports = router

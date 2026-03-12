@@ -20,5 +20,9 @@ router.patch("/:jobId/no-show", jwtAuth, setNoShow);
 router.get("/:jobId", jwtAuth, getJob);
 // retrieve a paginated list of open job postings
 router.get("/", getJobs);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 module.exports = router

@@ -51,4 +51,9 @@ router.patch("/availability-timeout", (req, res) => {
     });
 });
 
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
+
 module.exports = router

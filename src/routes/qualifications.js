@@ -14,5 +14,9 @@ router.patch("/:qualificationId", jwtAuth, updateQualification);
 router.get("/", getQualifications);
 // create a new qualification for a position type
 router.post("/", jwtAuth, createQualification);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 module.exports = router;

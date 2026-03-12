@@ -23,6 +23,11 @@ function create_app() {
     app.use("/system", systemsRoutes);
     app.use("/negotiations", negotiationRoutes);
 
+    // route has no matches
+    app.use((req, res) => {
+        res.status(404).json({ error: "Not Found" });
+    });
+
     return app;
 }
 

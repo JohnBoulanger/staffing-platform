@@ -27,5 +27,9 @@ router.get("/:businessId", getBusiness);
 router.get("/", getBusinesses);
 // register a new business account
 router.post("/", registerBusiness);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 module.exports = router

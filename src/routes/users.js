@@ -26,5 +26,9 @@ router.patch("/me", jwtAuth, updateUser);
 router.post("/", registerUser);
 // retrieve a list of regular users
 router.get("/", getUsers);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 module.exports = router

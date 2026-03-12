@@ -11,5 +11,9 @@ router.post("/", jwtAuth, createNegotiation);
 router.get("/me", jwtAuth, getNegotiations);
 // set the authenticated party's decision for an active negotiation
 router.patch("/me/decision", jwtAuth, setDecision);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 module.exports = router;

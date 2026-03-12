@@ -9,5 +9,9 @@ router.post("/tokens", authenticateAccount);
 router.post("/resets", createResetToken);
 // use the reset token to activate their account or reset their password
 router.post("/resets/:resetToken", useResetToken);
+// handle wrong methods
+router.all("*", (req, res, next) => { 
+    res.status(405).json({ error: "Method Not Allowed" }); 
+});
 
 module.exports = router;
