@@ -5,18 +5,28 @@ const jwtAuth = require("../middleware/auth");
 const { uploadDocument } = require("../middleware/upload");
 
 // upload or replace document for authenticated user
-router.put("/:qualificationId/document", jwtAuth, uploadDocument.single("file"), uploadQualificationDocument);
+router.route("/:qualificationId/document")
+    .put(jwtAuth, uploadDocument.single("file"), uploadQualificationDocument)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve a single qualification request
-router.get("/:qualificationId", jwtAuth, getQualification);
 // update a qualification request
-router.patch("/:qualificationId", jwtAuth, updateQualification);
+router.route("/:qualificationId")
+    .get(jwtAuth, getQualification)
+    .patch(jwtAuth, updateQualification)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve a list of qualifications that need admin attention
-router.get("/", getQualifications);
 // create a new qualification for a position type
-router.post("/", jwtAuth, createQualification);
-// handle wrong methods
-router.all("*", (req, res, next) => { 
-    res.status(405).json({ error: "Method Not Allowed" }); 
-});
+router.route("/")
+    .get(getQualifications)
+    .post(jwtAuth, createQualification)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
 
 module.exports = router;

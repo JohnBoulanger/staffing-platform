@@ -5,24 +5,59 @@ const jwtAuth = require("../middleware/auth");
 const router = express.Router()
 
 // list all discoverable qualified regular users for this job, and whether each has been invited by the business for this job.
-router.get("/:jobId/candidates", jwtAuth, getCandidates);
+router.route("/:jobId/candidates")
+    .get(jwtAuth, getCandidates)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve summary details about a regular user and their qualification for a given job.
-router.get("/:jobId/candidates/:userId", jwtAuth, getUserCandidates);
+router.route("/:jobId/candidates/:userId")
+    .get(jwtAuth, getUserCandidates)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // invite (or withdraw an invitation for) a regular user to express interest in this job posting.
-router.patch("/:jobId/candidates/:userId/interested", jwtAuth, updateInterestInCandidate);
+router.route("/:jobId/candidates/:userId/interested")
+    .patch(jwtAuth, updateInterestInCandidate)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve a list of regular users who are currently interested in this job posting.
-router.get("/:jobId/interests", jwtAuth, getInterests);
+router.route("/:jobId/interests")
+    .get(jwtAuth, getInterests)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // express interest in a job posting
-router.patch("/:jobId/interested", jwtAuth, setInterest);
+router.route("/:jobId/interested")
+    .patch(jwtAuth, setInterest)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // declare that the regular user did not show up to the job
-router.patch("/:jobId/no-show", jwtAuth, setNoShow);
+router.route("/:jobId/no-show")
+    .patch(jwtAuth, setNoShow)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // see detail of a job
-router.get("/:jobId", jwtAuth, getJob);
+router.route("/:jobId")
+    .get(jwtAuth, getJob)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve a paginated list of open job postings
-router.get("/", getJobs);
-// handle wrong methods
-router.all("*", (req, res, next) => { 
-    res.status(405).json({ error: "Method Not Allowed" }); 
-});
+router.route("/")
+    .get(getJobs)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
 
 module.exports = router

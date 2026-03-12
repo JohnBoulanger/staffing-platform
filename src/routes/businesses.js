@@ -6,30 +6,60 @@ const { uploadAvatar } = require("../middleware/upload");
 const router = express.Router()
 
 // edit an existing job
-router.patch("/me/jobs/:jobId", jwtAuth, updateJob);
 // delete an open or expired job posting
-router.delete("/me/jobs/:jobId", jwtAuth, deleteJob);
+router.route("/me/jobs/:jobId")
+    .patch(jwtAuth, updateJob)
+    .delete(jwtAuth, deleteJob)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // create a new job posting owned by the authenticated business
-router.post("/me/jobs", jwtAuth, createJob);
 // get a paginated list of jobs created by the currently logged in business.
-router.get("/me/jobs", jwtAuth, getJobs);
+router.route("/me/jobs")
+    .post(jwtAuth, createJob)
+    .get(jwtAuth, getJobs)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // upload or replace avatar for business
-router.put("/me/avatar", jwtAuth, uploadAvatar.single("file"), uploadBusinessAvatar);
+router.route("/me/avatar")
+    .put(jwtAuth, uploadAvatar.single("file"), uploadBusinessAvatar)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve the authenticated business profile
-router.get("/me", jwtAuth, getMyBusiness);
 // update fields on the authenticated business profile
-router.patch("/me", jwtAuth, updateMyBusiness);
+router.route("/me")
+    .get(jwtAuth, getMyBusiness)
+    .patch(jwtAuth, updateMyBusiness)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // set the verified status of a business
-router.patch("/:businessId/verified", verifyBusiness);
+router.route("/:businessId/verified")
+    .patch(verifyBusiness)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve a specific business
-router.get("/:businessId", getBusiness);
+router.route("/:businessId")
+    .get(getBusiness)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve a list of businesses
-router.get("/", getBusinesses);
 // register a new business account
-router.post("/", registerBusiness);
-// handle wrong methods
-router.all("*", (req, res, next) => { 
-    res.status(405).json({ error: "Method Not Allowed" }); 
-});
+router.route("/")
+    .get(getBusinesses)
+    .post(registerBusiness)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
 
 module.exports = router

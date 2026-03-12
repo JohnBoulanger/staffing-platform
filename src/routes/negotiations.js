@@ -6,14 +6,24 @@ const { createNegotiation, getNegotiations, setDecision } = require("../controll
 const router = express.Router();
 
 // start a negotiation for a job
-router.post("/", jwtAuth, createNegotiation);
+router.route("/")
+    .post(jwtAuth, createNegotiation)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // retrieve the authenticated users' current negotiation
-router.get("/me", jwtAuth, getNegotiations);
+router.route("/me")
+    .get(jwtAuth, getNegotiations)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
+
 // set the authenticated party's decision for an active negotiation
-router.patch("/me/decision", jwtAuth, setDecision);
-// handle wrong methods
-router.all("*", (req, res, next) => { 
-    res.status(405).json({ error: "Method Not Allowed" }); 
-});
+router.route("/me/decision")
+    .patch(jwtAuth, setDecision)
+    .all((req, res) => {
+        res.status(405).json({ error: "Method Not Allowed" });
+    });
 
 module.exports = router;
