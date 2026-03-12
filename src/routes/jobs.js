@@ -47,7 +47,7 @@ router.route("/:jobId/no-show")
     });
 
 // see detail of a job
-router.route("/:jobId")
+router.route("/:jobId(\\d+)")
     .get(jwtAuth, getJob)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
