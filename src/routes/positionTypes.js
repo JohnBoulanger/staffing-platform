@@ -1,12 +1,13 @@
 const express = require("express");
-const { createPositionType, updatePositionType, deletePositionType, getPositionTypes } = require("../controllers/positionTypeController")
+const { createPositionType, updatePositionType, deletePositionType, getPositionTypes } = require("../controllers/positionTypeController");
+const jwtAuth = require("../middleware/auth");
 
 const router = express.Router();
 
 // create a new position type
 // retrieve a list of position types
 router.route("/")
-    .post(createPositionType)
+    .post(jwtAuth, createPositionType)
     .get(getPositionTypes)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
@@ -15,8 +16,8 @@ router.route("/")
 // edit a position types details
 // delete a position type
 router.route("/:positionTypeId")
-    .patch(updatePositionType)
-    .delete(deletePositionType)
+    .patch(jwtAuth, updatePositionType)
+    .delete(jwtAuth, deletePositionType)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });

@@ -18,7 +18,7 @@ router.route("/me/resume").put(jwtAuth, uploadResume.single("file"), uploadUserR
     });
 
 // set the suspended status of a regular user
-router.route("/:userId/suspended").patch(updateUserSuspend)
+router.route("/:userId/suspended").patch(jwtAuth, updateUserSuspend)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });
@@ -53,7 +53,7 @@ router.route("/me").get(jwtAuth, getUser)
 // retrieve a list of regular users
 router.route("/")
     .post(registerUser)
-    .get(getUsers)
+    .get(jwtAuth, getUsers)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });

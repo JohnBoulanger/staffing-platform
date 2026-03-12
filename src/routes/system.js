@@ -1,11 +1,12 @@
 const express = require("express");
 const { setResetCooldown, setNegotiationWindow, setJobStartWindow, setAvailabilityTimeout } = require("../config/system");
+const jwtAuth = require("../middleware/auth");
 
 const router = express.Router()
 
 // update reset cooldown
 router.route("/reset-cooldown")
-    .patch((req, res) => {
+    .patch(jwtAuth, (req, res) => {
         const reset_cooldown = parseInt(req.body.reset_cooldown);
         if (isNaN(reset_cooldown) || reset_cooldown < 0) {
             return res.status(400).json({ error: "Bad Request" });
@@ -21,7 +22,7 @@ router.route("/reset-cooldown")
 
 // update negotiation window
 router.route("/negotiation-window")
-    .patch((req, res) => {
+    .patch(jwtAuth, (req, res) => {
         const negotiation_window = parseInt(req.body.negotiation_window);
         if (isNaN(negotiation_window) || negotiation_window <= 0) {
             return res.status(400).json({ error: "Bad Request" });
@@ -37,7 +38,7 @@ router.route("/negotiation-window")
 
 // update job start window
 router.route("/job-start-window")
-    .patch((req, res) => {
+    .patch(jwtAuth, (req, res) => {
         const job_start_window = parseInt(req.body.job_start_window);
         if (isNaN(job_start_window) || job_start_window <= 0) {
             return res.status(400).json({ error: "Bad Request" });
@@ -53,7 +54,7 @@ router.route("/job-start-window")
 
 // update availability timeout
 router.route("/availability-timeout")
-    .patch((req, res) => {
+    .patch(jwtAuth, (req, res) => {
         const availability_timeout = parseInt(req.body.availability_timeout);
         if (isNaN(availability_timeout) || availability_timeout <= 0) {
             return res.status(400).json({ error: "Bad Request" });

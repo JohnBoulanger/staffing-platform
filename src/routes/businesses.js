@@ -41,7 +41,7 @@ router.route("/me")
 
 // set the verified status of a business
 router.route("/:businessId/verified")
-    .patch(verifyBusiness)
+    .patch(jwtAuth, verifyBusiness)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });

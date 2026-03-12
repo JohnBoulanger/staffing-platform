@@ -23,7 +23,7 @@ router.route("/:qualificationId")
 // retrieve a list of qualifications that need admin attention
 // create a new qualification for a position type
 router.route("/")
-    .get(getQualifications)
+    .get(jwtAuth, getQualifications)
     .post(jwtAuth, createQualification)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
