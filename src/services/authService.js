@@ -85,11 +85,11 @@ class AuthService {
         });
 
         // check if account exists, token matches, and token not expired
+        if (reset && reset.account.email !== email) {
+            throw { type: "unauthorized" };
+        }
         if (!reset || reset.used) {
             throw { type: "not_found" };
-        }
-        if (reset.account.email !== email) {
-            throw { type: "unauthorized" };
         }
         if (reset.expiresAt < new Date()) {
             throw { type: "gone" };
