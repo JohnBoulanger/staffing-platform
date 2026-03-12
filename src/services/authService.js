@@ -119,7 +119,7 @@ class AuthService {
             newPassword = await encodePassword(password);
         }
 
-        await prisma.account.update({
+        const updated = await prisma.account.update({
             where: { id: reset.account.id },
             data: {
                 activated: true,
@@ -131,9 +131,9 @@ class AuthService {
             where: { token: resetToken },
             data: { used: true }
         });
+
+        return updated;
     }
 }
-
-
 
 module.exports = { AuthService };

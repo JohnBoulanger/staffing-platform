@@ -51,8 +51,8 @@ async function useResetToken(req, res) {
         if (!email) {
             return res.status(400).json({ error: "Bad Request" });
         }
-        await AuthService.useResetToken(email, password, resetToken);
-        return res.status(200).send();
+        const response = await AuthService.useResetToken(email, password, resetToken);
+        return res.status(200).json(response);
     }
     catch (error) {
         if (error.type === "validation") {
