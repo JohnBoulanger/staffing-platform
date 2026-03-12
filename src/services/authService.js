@@ -132,7 +132,11 @@ class AuthService {
             data: { used: true }
         });
 
-        return updated;
+        // include reset cooldown
+        return {
+            ...updated,
+            reset_cooldown: system.resetCooldown
+        };
     }
 }
 
