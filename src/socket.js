@@ -6,7 +6,7 @@ require('dotenv').config();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET || "test_secret";
 
 let io;
 function attach_sockets(server) {
