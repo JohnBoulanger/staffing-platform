@@ -2,7 +2,7 @@ const { QualificationService } = require("../services/qualificationService")
 
 async function createQualification(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const response = await QualificationService.createQualification(req.body, userId);
         return res.status(201).json(response);
     }
@@ -83,7 +83,7 @@ async function updateQualification(req, res) {
 
 async function uploadQualificationDocument(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const qualificationId = parseInt(req.params.qualificationId);
         if (isNaN(qualificationId)) {
             return res.status(404).json({ error: "Not Found" });

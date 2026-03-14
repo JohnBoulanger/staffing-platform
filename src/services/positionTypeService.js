@@ -61,8 +61,8 @@ class PositionTypeService {
         const where = {};
         if (keyword) {
             where.OR = [
-                { name: { contains: keyword, mode: "insensitive" } },
-                { description: { contains: keyword, mode: "insensitive" } }
+                { name: { contains: keyword } },
+                { description: { contains: keyword } }
             ];
         }
 

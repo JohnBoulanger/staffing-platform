@@ -73,7 +73,7 @@ async function getBusinesses(req, res) {
 
 async function getMyBusiness(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         const response = await BusinessService.getMyBusiness(businessId);
         return res.status(200).json(response);
     } catch (error) {
@@ -89,7 +89,7 @@ async function getMyBusiness(req, res) {
 
 async function updateMyBusiness(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         const response = await BusinessService.updateMyBusiness(req.body, businessId);
         return res.status(200).json(response);
     } catch (error) {
@@ -105,7 +105,7 @@ async function updateMyBusiness(req, res) {
 
 async function uploadBusinessAvatar(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
@@ -125,7 +125,7 @@ async function uploadBusinessAvatar(req, res) {
 
 async function createJob(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         const job = await BusinessService.createJob(req.body, businessId);
         return res.status(201).json(job);
     } catch (error) {
@@ -144,7 +144,7 @@ async function createJob(req, res) {
 
 async function getJobs(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         const jobs = await BusinessService.getJobs(req.query, businessId);
         return res.status(200).json(jobs);
     } catch (error) {
@@ -160,7 +160,7 @@ async function getJobs(req, res) {
 
 async function updateJob(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
             return res.status(404).json({ error: "Not Found" });
@@ -183,7 +183,7 @@ async function updateJob(req, res) {
 
 async function deleteJob(req, res) {
     try {
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         const jobId = parseInt(req.params.jobId);
         if (isNaN(jobId)) {
             return res.status(404).json({ error: "Not Found" });

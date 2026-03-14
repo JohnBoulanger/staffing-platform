@@ -19,7 +19,7 @@ async function createPositionType(req, res) {
 
 async function getPositionTypes(req, res) {
     try {
-        const requesterRole = req.user ? req.user.role : null;;
+        const requesterRole = req.user ? req.user.role : null;
         const positionTypes = await PositionTypeService.getPositionTypes(req.query, requesterRole);
         return res.status(200).json(positionTypes);
     }

@@ -33,7 +33,7 @@ async function getUsers(req, res) {
 // get specific user
 async function getUser(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const user = await UserService.getUser(userId);
         return res.status(200).json(user);
     }
@@ -51,7 +51,7 @@ async function getUser(req, res) {
 // updated authenticated user
 async function updateUser(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const user = await UserService.updateUser(req.body, userId);
         return res.status(200).json(user);
     }
@@ -69,7 +69,7 @@ async function updateUser(req, res) {
 // update user availability
 async function updateUserAvailability(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const user = await UserService.updateUserAvailability(req.body, userId);
         return res.status(200).json(user);
     }
@@ -108,7 +108,7 @@ async function updateUserSuspend(req, res) {
 // upload or replace avatar for authenticated user
 async function uploadUserAvatar(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
@@ -129,7 +129,7 @@ async function uploadUserAvatar(req, res) {
 // upload or replace resume for authenticated user
 async function uploadUserResume(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
@@ -149,7 +149,7 @@ async function uploadUserResume(req, res) {
 
 async function getInvitations(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const invitations = await UserService.getInvitations(req.query, userId);
         return res.status(200).json(invitations);
     } catch (error) {
@@ -162,7 +162,7 @@ async function getInvitations(req, res) {
 
 async function getInterests(req, res) {
     try {
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         const interests = await UserService.getInterests(req.query, userId);
         return res.status(200).json(interests);
     } catch (error) {

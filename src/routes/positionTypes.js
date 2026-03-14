@@ -1,6 +1,6 @@
 const express = require("express");
 const { createPositionType, updatePositionType, deletePositionType, getPositionTypes } = require("../controllers/positionTypeController");
-const { jwtAuth } = require("../middleware/auth");
+const { jwtAuth, optionalAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -8,7 +8,7 @@ const router = express.Router();
 // retrieve a list of position types
 router.route("/")
     .post(jwtAuth, createPositionType)
-    .get(getPositionTypes)
+    .get(optionalAuth, getPositionTypes)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });

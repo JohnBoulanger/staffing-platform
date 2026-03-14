@@ -62,7 +62,7 @@ async function setNoShow(req, res) {
 async function setInterest(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
-        const userId = req.user ? req.user.id : null;;
+        const userId = req.user ? req.user.id : null;
         if (isNaN(jobId)) {
             return res.status(404).json({ error: "Not Found" });
         }
@@ -88,7 +88,7 @@ async function setInterest(req, res) {
 async function getCandidates(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         if (isNaN(jobId)) {
             return res.status(404).json({ error: "Not Found" });
         }
@@ -109,7 +109,7 @@ async function getUserCandidates(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
         const userId = parseInt(req.params.userId);
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         if (isNaN(jobId) || isNaN(userId)) {
             return res.status(404).json({ error: "Not Found" });
         }
@@ -133,7 +133,7 @@ async function updateInterestInCandidate(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
         const userId = parseInt(req.params.userId);
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         if (isNaN(jobId) || isNaN(userId)) {
             return res.status(404).json({ error: "Not Found" });
         }
@@ -159,7 +159,7 @@ async function updateInterestInCandidate(req, res) {
 async function getInterests(req, res) {
     try {
         const jobId = parseInt(req.params.jobId);
-        const businessId = req.user ? req.user.id : null;;
+        const businessId = req.user ? req.user.id : null;
         if (isNaN(jobId)) {
             return res.status(404).json({ error: "Not Found" });
         }
