@@ -12,8 +12,8 @@ function isValidPassword(password) {
 
 function parseBoolean(value) {
     if (value === undefined) return undefined;
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (value === true || value === "true") return true;
+    if (value === false || value === "false") return false;
     throw { type: "validation" };
 }
 
