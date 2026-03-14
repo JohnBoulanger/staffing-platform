@@ -253,7 +253,12 @@ class BusinessService {
         };
     }
 
-    static async getMyBusiness(businessId) {
+    static async getMyBusiness(businessId, requesterRole) {
+        // admin only
+        if (requesterRole !== "business") {
+            throw { type: "forbidden" };
+        }
+
         // get authenticated business
         const business = await prisma.business.findUnique({
             where: { accountId: businessId },

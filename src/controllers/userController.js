@@ -19,12 +19,16 @@ async function registerUser(req, res) {
 // retrieve a list of regular users
 async function getUsers(req, res) {
     try {
-        const users = await UserService.getUsers(req.query);
+        const requesterRole = req.user ? req.user.role : null;
+        const users = await UserService.getUsers(req.query, requesterRole);
         return res.status(200).json(users);
     }
     catch (error) {
         if (error.type === "validation") {
             return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Not Allowed" });
         }
         return res.status(500).json({ error: "Internal Server Error" });
     }
@@ -87,16 +91,20 @@ async function updateUserAvailability(req, res) {
 // set the suspend status of a regular user
 async function updateUserSuspend(req, res) {
     try {
+        const requesterRole = req.user ? req.user.role : null;
         const userId = parseInt(req.params.userId);
         if (isNaN(userId)) {
             return res.status(404).json({ error: "Not Found" });
         }
-        const response = await UserService.updateUserSuspend(req.body, userId);
+        const response = await UserService.updateUserSuspend(req.body, userId, requesterRole);
         return res.status(200).json(response);
     }
     catch (error) {
         if (error.type === "validation") {
             return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Not Allowed" });
         }
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not Found" });

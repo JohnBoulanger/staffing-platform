@@ -20,6 +20,14 @@ class UserService {
             throw { type: "validation", message: "Invalid Password" };
         }
 
+        if (birthday !== undefined) {
+            parsedBirthday = new Date(birthday);
+
+            if (isNaN(parsedBirthday.getTime())) {
+                throw { type: "validation", message: "Invalid Birthday" };
+            }
+        }
+
         // check if a user already exists
         const existingUser = await prisma.account.findUnique({ where: { email } });
 
@@ -149,10 +157,17 @@ class UserService {
             data: update
         });
 
-        return update;
+        return {
+            id: userId,
+            ...update
+        }
     }
 
-    static async getUsers(data) {
+    static async getUsers(data, requesterRole) {
+        // admins only
+        if (requesterRole !== "admin") {
+            throw { type: "forbidden" };
+        }
         const { keyword } = data;
         const activated = parseBoolean(data.activated);
         const suspended = parseBoolean(data.suspended);
@@ -241,7 +256,11 @@ class UserService {
         return { available };
     }
 
-    static async updateUserSuspend(data, userId) {
+    static async updateUserSuspend(data, userId, requesterRole) {
+        // admins only
+        if (requesterRole !== "admin") {
+            throw { type: "forbidden" };
+        }
         // parse suspended variable
         const suspended = parseBoolean(data.suspended);
         if (suspended === undefined) {
