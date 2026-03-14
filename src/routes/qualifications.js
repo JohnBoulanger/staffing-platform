@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { createQualification, getQualifications, getQualification, updateQualification, uploadQualificationDocument } = require("../controllers/qualificationController");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth } = require("../middleware/auth");
 const { uploadDocument } = require("../middleware/upload");
 
 // upload or replace document for authenticated user

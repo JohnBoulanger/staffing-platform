@@ -1,6 +1,6 @@
 const express = require("express");
 const { setResetCooldown, setNegotiationWindow, setJobStartWindow, setAvailabilityTimeout } = require("../config/system");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth } = require("../middleware/auth");
 
 const router = express.Router()
 

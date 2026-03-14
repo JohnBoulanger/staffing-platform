@@ -46,4 +46,42 @@ const jwtAuth = (req, res, next) => {
   });
 }
 
-module.exports = jwtAuth
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  // no token should continue without user
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  jwt.verify(token, SECRET_KEY, async (error, userData) => {
+
+    // invalid token should ignore auth, continue
+    if (error) {
+      req.user = null;
+      return next();
+    }
+
+    try {
+      const user = await prisma.account.findUnique({
+        where: { id: userData.accountId }
+      });
+
+      if (!user) {
+        req.user = null;
+        return next();
+      }
+
+      req.user = user;
+      next();
+
+    } catch (error) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+  });
+};
+
+module.exports = { jwtAuth, optionalAuth }

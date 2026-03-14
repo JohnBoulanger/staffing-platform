@@ -1,6 +1,6 @@
 const express = require("express");
 const { createPositionType, updatePositionType, deletePositionType, getPositionTypes } = require("../controllers/positionTypeController");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth } = require("../middleware/auth");
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const { getJobs, getJob, setNoShow, setInterest, getCandidates, getUserCandidates, updateInterestInCandidate, getInterests } = require("../controllers/jobController");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth } = require("../middleware/auth");
 
 const router = express.Router()
 

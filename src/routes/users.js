@@ -1,6 +1,6 @@
 const express = require("express");
 const { registerUser, getUsers, updateUserSuspend, getUser, updateUser, updateUserAvailability, uploadUserAvatar, uploadUserResume, getInvitations, getInterests } = require("../controllers/userController");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth } = require("../middleware/auth");
 const { uploadAvatar, uploadResume } = require("../middleware/upload");
 
 const router = express.Router();

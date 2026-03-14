@@ -1,6 +1,6 @@
 const express = require("express");
 const { registerBusiness, verifyBusiness, getBusiness, getBusinesses, getMyBusiness, updateMyBusiness, uploadBusinessAvatar, createJob, getJobs, updateJob, deleteJob } = require("../controllers/businessController");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth, optionalAuth } = require("../middleware/auth");
 const { uploadAvatar } = require("../middleware/upload");
 
 const router = express.Router();

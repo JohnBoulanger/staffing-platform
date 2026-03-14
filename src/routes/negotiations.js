@@ -1,5 +1,5 @@
 const express = require("express");
-const jwtAuth = require("../middleware/auth");
+const { jwtAuth } = require("../middleware/auth");
 
 const { createNegotiation, getNegotiations, setDecision } = require("../controllers/negotiationController");
 
