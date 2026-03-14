@@ -13,7 +13,11 @@ class BusinessService {
             throw { type: "validation", message: "Bad Request" };
         }
 
+        // check if lat lon in range
         if (typeof location.lat !== "number" || typeof location.lon !== "number") {
+            throw { type: "validation", message: "Invalid Location" };
+        }
+        if (location.lat < -90 || location.lat > 90 || location.lon < -180 || location.lon > 180) {
             throw { type: "validation", message: "Invalid Location" };
         }
 
@@ -86,12 +90,16 @@ class BusinessService {
         };
     }
 
-    static async verifyBusiness(data, businessId) {
+    static async verifyBusiness(data, businessId, requesterRole) {
         const verified = parseBoolean(data.verified);
 
         const business = await prisma.business.findUnique({
             where: { accountId: businessId }
         });
+
+        if (requesterRole !== "admin") {
+            throw { type: "forbidden" };
+        }
 
         if (!business) {
             throw { type: "not_found" };

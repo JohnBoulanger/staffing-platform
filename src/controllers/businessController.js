@@ -21,11 +21,15 @@ async function verifyBusiness(req, res) {
         if (isNaN(businessId)) {
             return res.status(404).json({ error: "Not Found" });
         }
-        const response = await BusinessService.verifyBusiness(req.body, businessId);
+        const requesterRole = req.user ? req.user.role : null;
+        const response = await BusinessService.verifyBusiness(req.body, businessId, requesterRole);
         return res.status(200).json(response);
     } catch (error) {
         if (error.type === "validation") {
             return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Not Allowed" });
         }
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not Found" });
@@ -40,7 +44,7 @@ async function getBusiness(req, res) {
         if (isNaN(businessId)) {
             return res.status(404).json({ error: "Not Found" });
         }
-        const requesterRole = req.user ? req.user.role : null;;
+        const requesterRole = req.user ? req.user.role : null;
         const response = await BusinessService.getBusiness(businessId, requesterRole);
         return res.status(200).json(response);
     } catch (error) {

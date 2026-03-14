@@ -48,7 +48,7 @@ router.route("/:businessId/verified")
 
 // retrieve a specific business
 router.route("/:businessId")
-    .get(getBusiness)
+    .get(jwtAuth, getBusiness)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });
@@ -56,8 +56,8 @@ router.route("/:businessId")
 // retrieve a list of businesses
 // register a new business account
 router.route("/")
-    .get(getBusinesses)
-    .post(registerBusiness)
+    .get(jwtAuth, getBusinesses)
+    .post(jwtAuth, registerBusiness)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });
