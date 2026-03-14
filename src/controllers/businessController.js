@@ -109,16 +109,20 @@ async function updateMyBusiness(req, res) {
 
 async function uploadBusinessAvatar(req, res) {
     try {
+        const requesterRole = req.user ? req.user.role : null;
         const businessId = req.user ? req.user.id : null;
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
         const avatarUrl = `/uploads/users/${businessId}/${req.file.filename}`;
-        const response = await BusinessService.uploadBusinessAvatar(avatarUrl, businessId);
+        const response = await BusinessService.uploadBusinessAvatar(avatarUrl, businessId, requesterRole);
         return res.status(200).json(response);
     } catch (error) {
         if (error.type === "validation") {
             return res.status(400).json({ error: "Bad Request" });
+        }
+        if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Not Allowed" });
         }
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not Found" });

@@ -360,7 +360,7 @@ class BusinessService {
         return response;
     }
 
-    static async uploadBusinessAvatar(avatarUrl, businessId) {
+    static async uploadBusinessAvatar(avatarUrl, businessId, requesterRole) {
         if (!avatarUrl) {
             throw { type: "validation" };
         }

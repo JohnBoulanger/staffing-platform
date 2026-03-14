@@ -20,6 +20,7 @@ class UserService {
             throw { type: "validation", message: "Invalid Password" };
         }
 
+        let parsedBirthday;
         if (birthday !== undefined) {
             parsedBirthday = new Date(birthday);
 
@@ -50,7 +51,7 @@ class UserService {
                         last_name,
                         phone_number,
                         postal_address,
-                        birthday: birthday ? new Date(birthday) : new Date("1970-01-01")
+                        birthday: parsedBirthday ?? new Date("1970-01-01")
                     }
                 }
             },
