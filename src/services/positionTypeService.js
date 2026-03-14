@@ -3,7 +3,7 @@ const { parseBoolean } = require("../helpers/validation");
 const prisma = new PrismaClient();
 
 class PositionTypeService {
-    static async createPositionType(data) {
+    static async createPositionType(data, requesterRole) {
         const { name, description } = data;
 
         if (!name || !description) {
