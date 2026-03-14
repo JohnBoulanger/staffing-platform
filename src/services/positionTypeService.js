@@ -9,7 +9,12 @@ class PositionTypeService {
         if (!name || !description) {
             throw { type: "validation" };
         }
-        const hidden = data.hidden ? parseBoolean(data.hidden) : true;
+
+        if (requesterRole !== "admin") {
+            throw { type: "forbidden" };
+        }
+
+        const hidden = data.hidden !== undefined ? parseBoolean(data.hidden) : true;
 
         const positionType = await prisma.positionType.create({
             data: {
@@ -19,8 +24,20 @@ class PositionTypeService {
             }
         });
 
-        // todo: add num_qualified to return value
-        return positionType;
+        const num_qualified = await prisma.qualification.count({
+            where: {
+                positionTypeId: positionType.id,
+                status: "approved"
+            }
+        });
+
+        return {
+            id: positionType.id,
+            name: positionType.name,
+            description: positionType.description,
+            hidden: positionType.hidden,
+            num_qualified
+        };
     }
 
     static async getPositionTypes(data, requesterRole) {
@@ -135,7 +152,12 @@ class PositionTypeService {
         };
     }
 
-    static async deletePositionType(positionTypeId) {
+    static async deletePositionType(positionTypeId, requesterRole) {
+
+        if (requesterRole !== "admin") {
+            throw { type: "forbidden" };
+        }
+
         // find position type associated with id
         const positionType = await prisma.positionType.findUnique({
             where: { id: positionTypeId }
@@ -145,7 +167,23 @@ class PositionTypeService {
             throw { type: "not_found" };
         }
 
-        // todo: implement conflic error handler
+        // check qualifications
+        const qualificationCount = await prisma.qualification.count({
+            where: { positionTypeId }
+        });
+
+        if (qualificationCount > 0) {
+            throw { type: "conflict" };
+        }
+
+        // check jobs
+        const jobCount = await prisma.job.count({
+            where: { positionTypeId }
+        });
+
+        if (jobCount > 0) {
+            throw { type: "conflict" };
+        }
 
         await prisma.positionType.delete({
             where: { id: positionTypeId }

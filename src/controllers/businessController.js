@@ -57,7 +57,7 @@ async function getBusiness(req, res) {
 
 async function getBusinesses(req, res) {
     try {
-        const requesterRole = req.user ? req.user.role : null;;
+        const requesterRole = req.user ? req.user.role : null;
         const response = await BusinessService.getBusinesses(req.query, requesterRole);
         return res.status(200).json(response);
     } catch (error) {
