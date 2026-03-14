@@ -22,10 +22,22 @@ class UserService {
 
         let parsedBirthday;
         if (birthday !== undefined) {
+
+            // must be string in YYYY-MM-DD format
+            if (typeof birthday !== "string") {
+                throw { type: "validation" };
+            }
+
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+            if (!dateRegex.test(birthday)) {
+                throw { type: "validation" };
+            }
+
             parsedBirthday = new Date(birthday);
 
             if (isNaN(parsedBirthday.getTime())) {
-                throw { type: "validation", message: "Invalid Birthday" };
+                throw { type: "validation" };
             }
         }
 
