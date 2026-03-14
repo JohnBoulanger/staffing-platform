@@ -50,14 +50,7 @@ class PositionTypeService {
     static async getPositionTypes(data, requesterRole) {
         const { keyword, name, num_qualified } = data;
 
-        let hidden;
-        if (data.hidden === undefined) {
-            hidden = undefined;
-        } else if (typeof data.hidden === "boolean") {
-            hidden = data.hidden;
-        } else {
-            hidden = parseBoolean(data.hidden);
-        }
+        const hidden = parseBoolean(data.hidden);
 
         const page = parseInt(data.page) || 1;
         const limit = parseInt(data.limit) || 10;
@@ -139,7 +132,7 @@ class PositionTypeService {
         }
 
         // sort by num_qualified if requested
-        if (requesterRole === "admin" && num_qualified) {
+        if (requesterRole === "admin" && num_qualified !== undefined) {
             results.sort((a, b) =>
                 num_qualified === "asc"
                     ? a.num_qualified - b.num_qualified
