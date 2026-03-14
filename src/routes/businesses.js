@@ -57,7 +57,7 @@ router.route("/:businessId")
 // register a new business account
 router.route("/")
     .get(jwtAuth, getBusinesses)
-    .post(jwtAuth, registerBusiness)
+    .post(registerBusiness)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });
