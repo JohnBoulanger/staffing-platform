@@ -14,7 +14,14 @@ class PositionTypeService {
             throw { type: "forbidden" };
         }
 
-        const hidden = data.hidden !== undefined ? parseBoolean(data.hidden) : true;
+        let hidden;
+        if (data.hidden === undefined) {
+            hidden = true;
+        } else if (typeof data.hidden === "boolean") {
+            hidden = data.hidden;
+        } else {
+            hidden = parseBoolean(data.hidden);
+        }
 
         const positionType = await prisma.positionType.create({
             data: {
@@ -42,7 +49,16 @@ class PositionTypeService {
 
     static async getPositionTypes(data, requesterRole) {
         const { keyword, name, num_qualified } = data;
-        const hidden = parseBoolean(data.hidden);
+
+        let hidden;
+        if (data.hidden === undefined) {
+            hidden = undefined;
+        } else if (typeof data.hidden === "boolean") {
+            hidden = data.hidden;
+        } else {
+            hidden = parseBoolean(data.hidden);
+        }
+
         const page = parseInt(data.page) || 1;
         const limit = parseInt(data.limit) || 10;
         const skip = (page - 1) * limit;
@@ -52,8 +68,8 @@ class PositionTypeService {
         const where = {};
         if (keyword) {
             where.OR = [
-                { name: { contains: keyword } },
-                { description: { contains: keyword } }
+                { name: { contains: keyword, mode: "insensitive" } },
+                { description: { contains: keyword, mode: "insensitive" } }
             ];
         }
 
@@ -85,8 +101,6 @@ class PositionTypeService {
             if (requesterRole !== "admin" || !orderValues.includes(num_qualified)) {
                 throw { type: "validation" };
             }
-            // sort by num_qualified first if provided
-            orderBy.unshift({ num_qualified });
         }
 
         // compute filtered count of position types and get list
@@ -100,7 +114,10 @@ class PositionTypeService {
         });
 
         // build return object
-        const results = positionTypes.map((p) => {
+        const results = [];
+
+        for (const p of positionTypes) {
+
             const positionTypeObj = {
                 id: p.id,
                 name: p.name,
@@ -108,12 +125,27 @@ class PositionTypeService {
             };
 
             if (requesterRole === "admin") {
+                const numQualified = await prisma.qualification.count({
+                    where: {
+                        positionTypeId: p.id,
+                        status: "approved"
+                    }
+                });
                 positionTypeObj.hidden = p.hidden;
-                positionTypeObj.num_qualified = p.num_qualified;
+                positionTypeObj.num_qualified = numQualified;
             }
 
-            return positionTypeObj;
-        });
+            results.push(positionTypeObj);
+        }
+
+        // sort by num_qualified if requested
+        if (requesterRole === "admin" && num_qualified) {
+            results.sort((a, b) =>
+                num_qualified === "asc"
+                    ? a.num_qualified - b.num_qualified
+                    : b.num_qualified - a.num_qualified
+            );
+        }
 
         return {
             count,
@@ -121,9 +153,13 @@ class PositionTypeService {
         };
     }
 
-    static async updatePositionType(data, positionTypeId) {
+    static async updatePositionType(data, positionTypeId, requesterRole) {
         const { name, description } = data;
         const hidden = parseBoolean(data.hidden);
+
+        if (requesterRole !== "admin") {
+            throw { type: "forbidden" };
+        }
 
         // find position type associated with id
         const positionType = await prisma.positionType.findUnique({
@@ -136,8 +172,8 @@ class PositionTypeService {
 
         // construct update body
         const updateValues = {};
-        if (name) updateValues.name = name;
-        if (description) updateValues.description = description;
+        if (name !== undefined) updateValues.name = name;
+        if (description !== undefined) updateValues.description = description;
         if (hidden !== undefined) updateValues.hidden = hidden;
 
         const updated = await prisma.positionType.update({

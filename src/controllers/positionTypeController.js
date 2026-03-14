@@ -38,12 +38,15 @@ async function updatePositionType(req, res) {
         if (isNaN(positionTypeId)) {
             return res.status(404).json({ error: "Not Found" });
         }
-        const response = await PositionTypeService.updatePositionType(positionTypeId, requesterRole);
+        const response = await PositionTypeService.updatePositionType(req.body, positionTypeId, requesterRole);
         return res.status(200).json(response);
     }
     catch (error) {
         if (error.type === "validation") {
             return res.status(400).json({ error: "Bad Request" });
+        }
+                if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Not Allowed" });
         }
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not found" });
@@ -54,14 +57,18 @@ async function updatePositionType(req, res) {
 
 async function deletePositionType(req, res) {
     try {
+        const requesterRole = req.user ? req.user.role : null;
         const positionTypeId = parseInt(req.params.positionTypeId);
         if (isNaN(positionTypeId)) {
             return res.status(404).json({ error: "Not Found" });
         }
-        await PositionTypeService.deletePositionType(positionTypeId);
+        await PositionTypeService.deletePositionType(positionTypeId, requesterRole);
         return res.status(204).send();
     }
     catch (error) {
+        if (error.type === "forbidden") {
+            return res.status(403).json({ error: "Not Allowed" });
+        }
         if (error.type === "not_found") {
             return res.status(404).json({ error: "Not found" });
         }
