@@ -91,19 +91,19 @@ class BusinessService {
     }
 
     static async verifyBusiness(data, businessId, requesterRole) {
-        const verified = parseBoolean(data.verified);
-
         const business = await prisma.business.findUnique({
             where: { accountId: businessId }
         });
+
+        if (!business) {
+            throw { type: "not_found" };
+        }
 
         if (requesterRole !== "admin") {
             throw { type: "forbidden" };
         }
 
-        if (!business) {
-            throw { type: "not_found" };
-        }
+        const verified = parseBoolean(data.verified);
 
         const updated = await prisma.business.update({
             where: { accountId: businessId },
@@ -264,9 +264,15 @@ class BusinessService {
             throw { type: "not_found" };
         }
 
+        // must be a business user
+        if (requesterRole !== "business") {
+            throw { type: "forbidden" };
+        }
+
         return {
             id: business.accountId,
             business_name: business.business_name,
+            owner_name: business.owner_name,
             email: business.account.email,
             role: business.account.role,
             phone_number: business.phone_number ?? "",
@@ -301,7 +307,7 @@ class BusinessService {
         }
 
         const update = {};
-        const response = {};
+        const response = { id: businessId };
         if ("business_name" in data) {
             update.business_name = business_name;
             response.business_name = business_name;
@@ -352,6 +358,11 @@ class BusinessService {
     static async uploadBusinessAvatar(avatarUrl, businessId) {
         if (!avatarUrl) {
             throw { type: "validation" };
+        }
+
+        // must be a business user
+        if (requesterRole !== "business") {
+            throw { type: "forbidden" };
         }
         
         // get authenticated business

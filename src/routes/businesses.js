@@ -48,7 +48,7 @@ router.route("/:businessId/verified")
 
 // retrieve a specific business
 router.route("/:businessId")
-    .get(jwtAuth, getBusiness)
+    .get(optionalAuth, getBusiness)
     .all((req, res) => {
         res.status(405).json({ error: "Method Not Allowed" });
     });
